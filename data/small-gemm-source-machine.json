@@ -1,0 +1,43 @@
+{
+  "strided": {
+    "cases": 69,
+    "supported_cases": 69,
+    "unsupported_cases": 0,
+    "max_abs_error": 3.337860107421875e-06,
+    "supported_results_match_cpu": true,
+    "nondefault_stream": false
+  },
+  "sgemm": {
+    "cases": 69,
+    "supported_cases": 69,
+    "unsupported_cases": 0,
+    "max_abs_error": 3.337860107421875e-06,
+    "supported_results_match_cpu": true,
+    "nondefault_stream": true
+  },
+  "ex": {
+    "cases": 69,
+    "supported_cases": 69,
+    "unsupported_cases": 0,
+    "max_abs_error": 3.337860107421875e-06,
+    "supported_results_match_cpu": true,
+    "nondefault_stream": true
+  },
+  "strided-ex": {
+    "cases": 69,
+    "supported_cases": 69,
+    "unsupported_cases": 0,
+    "max_abs_error": 3.337860107421875e-06,
+    "supported_results_match_cpu": true,
+    "nondefault_stream": true
+  },
+  "context": {
+    "recorded_date": "2026-10-22",
+    "device": "RX590 GME / gfx803",
+    "os": "Windows Server 2022",
+    "driver": "31.0.12024.0",
+    "hip": "5.7.1",
+    "scope": "Historical results from source machine; not validation of the portable build helper or target machine",
+    "default_strided_comparison_iterations": 98
+  }
+}

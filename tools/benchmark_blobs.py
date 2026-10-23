@@ -2,10 +2,13 @@
 """Isolated rocBLAS correctness/steady-state GEMM probe. Explicit manual use only."""
 import argparse,ctypes,json,os,statistics,sys,time
 from pathlib import Path
+sys.path.insert(0,str(Path(__file__).resolve().parent))
+from hip_runtime import resolve
 p=argparse.ArgumentParser()
 p.add_argument('--hip',required=True);p.add_argument('--zluda',required=True)
 p.add_argument('--dll',required=True);p.add_argument('--kernels',required=True)
 p.add_argument('--label',required=True);p.add_argument('--cache',required=True)
+p.add_argument('--hip-runtime')
 p.add_argument('--suite',choices=['general','diffusion'],default='general')
 a=p.parse_args()
 hip,zluda,dll,kernels=[Path(v).resolve() for v in [a.hip,a.zluda,a.dll,a.kernels]]
@@ -14,7 +17,9 @@ for path in [hip/'bin',zluda,dll.parent,kernels]:
 os.environ.update(HIP_PATH=str(hip),ROCBLAS_TENSILE_LIBPATH=str(kernels),ZLUDA_CACHE_DIR=a.cache,DISABLE_ADDMM_CUDA_LT='1',CUDA_MODULE_LOADING='LAZY',OMP_NUM_THREADS='8',OPENBLAS_NUM_THREADS='8')
 for key in ['HSA_OVERRIDE_GFX_VERSION','GPU_FORCE_BLIT_COPY_SIZE']:os.environ.pop(key,None)
 handles=[os.add_dll_directory(str(x)) for x in [dll.parent,hip/'bin',zluda]]
-handles.extend([ctypes.WinDLL(str(Path(os.environ['SystemRoot'])/'System32'/'amdhip64.dll')),ctypes.WinDLL(str(dll)),ctypes.WinDLL(str(zluda/'nvcuda.dll')),ctypes.WinDLL(str(zluda/'cublas.dll'))])
+runtime=resolve(hip.parent,a.hip_runtime)
+handles.append(os.add_dll_directory(str(runtime.parent)))
+handles.extend([ctypes.WinDLL(str(runtime)),ctypes.WinDLL(str(dll)),ctypes.WinDLL(str(zluda/'nvcuda.dll')),ctypes.WinDLL(str(zluda/'cublas.dll'))])
 def emit(**v):print(json.dumps({'profile':a.label,**v}),flush=True)
 emit(stage='libraries_loaded')
 import torch

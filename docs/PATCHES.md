@@ -44,3 +44,21 @@ ships source patches and pinned acquisition logic, not a mirror of third-party b
 ## Fresh isolated patch comparison
 
 [2026-10-23 methods and tables](BLOB-RETRY-2026-10-23.md) include two matched baseline FP32/FP16 runs, full optic/vega candidates, four partial swaps, diffusion-like FP32 GEMMs and controlled/practical Vulkan comparisons. These tests do not identify a safe faster rocBLAS replacement. The default patch set remains unchanged. Per-component percentages in the retry concern named GEMM shapes; application ratios are explicitly whole-configuration measurements.
+
+## Optional native small-GEMM correction (new contribution)
+
+[Source, build/apply/rollback commands and validation](SMALL-GEMM.md).
+`-WithSmallGemmPatch` compiles a bounded FP32 Windows/HIP kernel and forwarding
+shim; the matched original backend is preserved as rocblas_backend.dll.
+It fixes the six unsupported T/T tiny cases in the current native suite, while
+retaining 3936 original export ordinals (3932 forwarded / four overridden).
+The portable build also repairs AMD LLD 17 forwarder ordinal reassignment.
+This is Schaka-inspired local source, not the original Linux patches or an
+entire CUDA/ROCm implementation. Scalar/device/capture/query fallbacks and
+rollback are checked separately; no generation speedup is measured here.
+
+`-WithTorchDirectML` adds a separate cp311 environment; `Check-Zluda.cmd` adds
+model-free CUDA/PTX diagnostics. Adapter detection excludes DXGI software and
+keeps Torch DirectML indices separate. Explicit existing HIP runtime selection
+is supported without changing a GPU driver. Historical missing-shape reports
+above remain evidence about the unmodified original backend, not the optional fix.

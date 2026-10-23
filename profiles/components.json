@@ -43,5 +43,29 @@
     "url": "https://aka.ms/vs/17/release/vc_redist.x64.exe",
     "signature_publisher": "Microsoft Corporation",
     "version": "2015-2022 x64; Microsoft-serviced download"
+  },
+  "python311": {
+    "url": "https://www.python.org/ftp/python/3.11.9/python-3.11.9-embed-amd64.zip",
+    "sha256": "009d6bf7e3b2ddca3d784fa09f90fe54336d5b60f0e0f305c37f400bf83cfd3b",
+    "version": "3.11.9",
+    "abi": "cp311-win_amd64"
+  },
+  "torch_dml": {
+    "url": "https://files.pythonhosted.org/packages/84/8b/00528e6c75e030cc5f1fc1d08c58c46ecdbec9cd406b1dfd03023e3af4aa/torch_directml-0.2.5.dev240914-cp311-cp311-win_amd64.whl",
+    "sha256": "3315b6c7e898685827607f1d8170dacc386ac248502aba9bd36cf82e78d930bb",
+    "version": "0.2.5.dev240914",
+    "abi": "cp311-win_amd64"
+  },
+  "torch_dml_cpu": {
+    "url": "https://download-r2.pytorch.org/whl/cpu/torch-2.4.1%2Bcpu-cp311-cp311-win_amd64.whl",
+    "sha256": "76a6fe7b10491b650c630bc9ae328df40f79a948296b41d3b087b29a8a63cbad",
+    "version": "2.4.1+cpu",
+    "abi": "cp311-win_amd64"
+  },
+  "torch_dml_vision": {
+    "url": "https://download-r2.pytorch.org/whl/cpu/torchvision-0.19.1%2Bcpu-cp311-cp311-win_amd64.whl",
+    "sha256": "49d644cd562a022b43100e0f8f7cdbb17ef69d584120ad8fcb7e327741f3605b",
+    "version": "0.19.1+cpu",
+    "abi": "cp311-win_amd64"
   }
 }

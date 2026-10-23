@@ -9,3 +9,7 @@
 - ComfyUI was installed but not launched in the original experiment. No ComfyUI image-generation speed claim is supported.
 - Release archives contain this project's source installer only. Third-party software is downloaded from its publisher.
 - Preserve GPL notices and upstream license/source links. Do not upload the original private portable archive.
+
+- Small-GEMM is opt-in and bounded to tiny FP32 on the tested device/context. Preserve the original backend hash and all original export ordinals.
+- Historical source-machine results and current-machine checks must stay separate. Never promote generated shim, hsaco, import DLLs or raw reports into Git/source archives.
+- Keep Torch DirectML in its separate cp311 environment; DXGI and Torch device indices are not interchangeable.

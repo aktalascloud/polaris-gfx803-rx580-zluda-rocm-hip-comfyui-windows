@@ -7,7 +7,12 @@ param(
     [switch]$AcceptThirdPartyLicenses,
     [switch]$WithComfyUI,
     [switch]$WithoutComfyUI,
-    [switch]$NoDesktopShortcut
+    [switch]$NoDesktopShortcut,
+    [switch]$WithSmallGemmPatch,
+    [switch]$WithTorchDirectML,
+    [string]$HipRuntime='',
+    [int]$DxgiDevice=-1,
+    [string]$DownloadCache=''
 )
 $ErrorActionPreference='Stop'
 [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
@@ -30,7 +35,8 @@ if($Backend -eq 'Auto'){
     if($names -match 'RX\s*(470|480|570|580|590)'){$Backend='AMD'}
     else{throw 'This installer targets AMD Polaris/gfx803. For a compatible card not recognized by name, select -Backend AMD explicitly.'}
 }
-if(!(Test-Path -LiteralPath "$env:SystemRoot\System32\amdhip64.dll")){
+if($HipRuntime -and !(Test-Path -LiteralPath $HipRuntime -PathType Leaf)){throw 'The explicit existing HIP runtime does not exist'}
+if(!$HipRuntime -and !(Test-Path -LiteralPath "$env:SystemRoot\System32\amdhip64.dll") -and !($HipRoot -and (Test-Path -LiteralPath (Join-Path $HipRoot 'bin\amdhip64.dll')))){
     throw 'The installed AMD driver does not provide amdhip64.dll. This installer never installs or replaces a GPU driver.'
 }
 New-Item -ItemType Directory -Path $root -Force | Out-Null
@@ -44,17 +50,24 @@ function Fetch([string]$Name,[string]$FileName){
     $asset=$components.$Name
     Write-Host "Fetching pinned component: $Name"
     $path=Join-Path $downloads $FileName
+    $fromCache=$false
+    if($DownloadCache -and (Test-Path -LiteralPath (Join-Path $DownloadCache $FileName) -PathType Leaf)){
+        $path=Join-Path $DownloadCache $FileName
+        $fromCache=$true
+    }
+    $part=$path+'.part'
+    $candidate=$path
     if(!(Test-Path -LiteralPath $path)){
-        $part=$path+'.part'
         CheckedRun 'curl.exe' @('--silent','--show-error','--fail','--location','--retry','3','--proto','=https','--output',$part,[string]$asset.url)
-        Move-Item -LiteralPath $part -Destination $path
+        $candidate=$part
     }
     if($asset.sha256){
-        if((Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -ne $asset.sha256){throw "SHA256 mismatch: $Name"}
+        if((Get-FileHash -LiteralPath $candidate -Algorithm SHA256).Hash -ne $asset.sha256){throw "SHA256 mismatch: $Name"}
     } elseif($asset.signature_publisher){
-        $signature=Get-AuthenticodeSignature -LiteralPath $path
+        $signature=Get-AuthenticodeSignature -LiteralPath $candidate
         if($signature.Status -ne 'Valid' -or $signature.SignerCertificate.Subject -notmatch $asset.signature_publisher){throw "Publisher signature verification failed: $Name"}
     } else{throw "No integrity policy for $Name"}
+    if($candidate -eq $part -and !$fromCache){Move-Item -LiteralPath $part -Destination $path}
     return $path
 }
 function AdminExtract([string]$Msi,[string]$Destination){
@@ -73,6 +86,14 @@ $pythonArchive=Fetch 'python' 'python-embed.zip'
 $pipWheel=Fetch 'pip' 'pip-bootstrap.whl'
 $cuda=Join-Path $root 'envs\cuda'
 $onnx=Join-Path $root 'envs\onnx'
+$diagnostics=Join-Path $root 'envs\diagnostics'
+New-Item -ItemType Directory -Path $diagnostics -Force | Out-Null
+Expand-Archive -LiteralPath $pythonArchive -DestinationPath $diagnostics
+@('python312.zip','.','import site') | Set-Content -LiteralPath (Join-Path $diagnostics 'python312._pth') -Encoding ASCII
+$probePython=Join-Path $diagnostics 'python.exe'
+$selection=& $probePython -I (Join-Path $source 'tools\gpu_devices.py') --select --index $DxgiDevice
+if($LASTEXITCODE){throw 'Choose a physical Radeon with -DxgiDevice; see the listed DXGI candidates'}
+$device=$selection | ConvertFrom-Json
 foreach($environment in @($cuda,$onnx)){
     New-Item -ItemType Directory -Path $environment -Force | Out-Null
     Expand-Archive -LiteralPath $pythonArchive -DestinationPath $environment
@@ -90,6 +111,22 @@ $torchWheel=Fetch 'torch' 'torch-2.2.1+cu118-cp312-cp312-win_amd64.whl'
 CheckedRun $cudaPython @('-I','-m','pip','--isolated','install','--no-cache-dir','--disable-pip-version-check','-c',$cudaRequirements,$torchWheel,'torchvision==0.17.1+cu118','torchaudio==2.2.1+cu118','--index-url','https://download.pytorch.org/whl/cu118','--extra-index-url','https://pypi.org/simple')
 CheckedRun $cudaPython @('-I','-m','pip','--isolated','install','--no-cache-dir','--only-binary=:all:','--disable-pip-version-check','-r',$installRequirements,'--index-url','https://pypi.org/simple')
 CheckedRun $onnxPython @('-I','-m','pip','--isolated','install','--no-cache-dir','--only-binary=:all:','--disable-pip-version-check','-r',$onnxRequirements,'--index-url','https://pypi.org/simple')
+if($WithTorchDirectML){
+    $dml=Join-Path $root 'envs\torch-directml'
+    New-Item -ItemType Directory -Path $dml -Force | Out-Null
+    $python311=Fetch 'python311' 'python-3.11.9-embed-amd64.zip'
+    Expand-Archive -LiteralPath $python311 -DestinationPath $dml
+    $site=Join-Path $dml 'Lib\site-packages'
+    New-Item -ItemType Directory -Path $site -Force | Out-Null
+    @('python311.zip','.','Lib','Lib\site-packages','import site') | Set-Content -LiteralPath (Join-Path $dml 'python311._pth') -Encoding ASCII
+    $dmlPython=Join-Path $dml 'python.exe'
+    CheckedRun $dmlPython @('-I',(Join-Path $source 'tools\prepare.py'),'unzip',$pipWheel,$site)
+    $dmlTorch=Fetch 'torch_dml_cpu' 'torch-2.4.1+cpu-cp311-cp311-win_amd64.whl'
+    $dmlVision=Fetch 'torch_dml_vision' 'torchvision-0.19.1+cpu-cp311-cp311-win_amd64.whl'
+    $dmlProvider=Fetch 'torch_dml' 'torch_directml-0.2.5.dev240914-cp311-cp311-win_amd64.whl'
+    CheckedRun $dmlPython @('-I','-m','pip','--isolated','install','--no-deps','--no-cache-dir',$dmlTorch,$dmlVision,$dmlProvider)
+    CheckedRun $dmlPython @('-I','-m','pip','--isolated','install','--no-cache-dir','--require-hashes','-r',(Join-Path $source 'requirements\torch-directml-py311.txt'),'--index-url','https://pypi.org/simple')
+}
 $apps=Join-Path $root 'apps'
 New-Item -ItemType Directory -Path $apps -Force | Out-Null
 if($WithComfyUI){
@@ -151,14 +188,27 @@ if($Backend -eq 'AMD'){
     $zludaArchive=Fetch 'zluda' 'zluda-3.9.5.zip'
     CheckedRun $cudaPython @('-I',(Join-Path $source 'tools\prepare.py'),'unzip',$zludaArchive,$root)
     $torchLib=Join-Path $cuda 'Lib\site-packages\torch\lib'
+    $originalNvrtcHash=(Get-FileHash -LiteralPath (Join-Path $torchLib 'nvrtc64_112_0.dll') -Algorithm SHA256).Hash.ToLowerInvariant()
     Copy-Item -LiteralPath (Join-Path $torchLib 'nvrtc64_112_0.dll') -Destination (Join-Path $torchLib 'nvrtc_cuda.dll')
     foreach($pair in @(@('cublas.dll','cublas64_11.dll'),@('cusparse.dll','cusparse64_11.dll'),@('nvrtc.dll','nvrtc64_112_0.dll'))){
         Copy-Item -LiteralPath (Join-Path $root ('zluda\'+$pair[0])) -Destination (Join-Path $torchLib $pair[1]) -Force
     }
 }
 Copy-Item -LiteralPath (Join-Path $source 'tools') -Destination (Join-Path $root 'tools') -Recurse
-foreach($name in @('Python-CUDA.cmd','Python-ONNX.cmd','Run-ZLUDA.cmd','HIP-Shell.cmd')){Copy-Item -LiteralPath (Join-Path $source $name) -Destination (Join-Path $root $name)}
-@{backend=$Backend;version='0.2.1';comfy_installed=[bool]$WithComfyUI;architecture='Polaris/gfx803';comfy_commit='c0c011dca91b595091a4b032770da366fc90fb2b';models_included=$false} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $root 'profile.json') -Encoding UTF8
+Copy-Item -LiteralPath (Join-Path $source 'patches') -Destination (Join-Path $root 'patches') -Recurse
+foreach($name in @('Python-CUDA.cmd','Python-ONNX.cmd','Run-ZLUDA.cmd','HIP-Shell.cmd','Check-Zluda.cmd')){Copy-Item -LiteralPath (Join-Path $source $name) -Destination (Join-Path $root $name)}
+if($WithTorchDirectML){Copy-Item -LiteralPath (Join-Path $source 'Python-DirectML.cmd') -Destination $root}
+$profile=@{backend=$Backend;version='0.3.0';comfy_installed=[bool]$WithComfyUI;torch_directml_installed=[bool]$WithTorchDirectML;architecture='Polaris/gfx803';comfy_commit='c0c011dca91b595091a4b032770da366fc90fb2b';models_included=$false;dxgi_device_id=$device.dxgi_index}
+$profile.original_nvrtc_sha256=$originalNvrtcHash
+if($HipRuntime){$profile.hip_runtime=(Resolve-Path -LiteralPath $HipRuntime).ProviderPath}
+$profile | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $root 'profile.json') -Encoding UTF8
+# PE/version diagnostics only: no device allocation or numerical workload.
+CheckedRun $probePython @('-I',(Join-Path $source 'tools\hip_runtime.py'),'--root',$root)
+if($WithSmallGemmPatch){
+    $build=Join-Path $source ('work\small-gemm-'+[guid]::NewGuid().ToString('N'))
+    & (Join-Path $source 'patches\small-gemm\Build-SmallGemm.ps1') -HipRoot (Join-Path $root 'hip') -BackendDll (Join-Path $root 'hip\bin\rocblas.dll') -Python $probePython -OutDir $build
+    & (Join-Path $source 'tools\Small-Gemm.ps1') -RuntimeRoot $root -BuildDirectory $build
+}
 New-Item -ItemType Directory -Path (Join-Path $root 'models'),(Join-Path $root 'temp') -Force | Out-Null
 if($WithComfyUI){
     Copy-Item -LiteralPath (Join-Path $source 'Start-ComfyUI.cmd') -Destination $root

@@ -4,6 +4,7 @@ import ctypes
 import json
 import os
 from pathlib import Path
+from hip_runtime import resolve
 
 ROOT=Path(__file__).resolve().parent.parent
 HANDLES=[]
@@ -17,10 +18,15 @@ def configure():
         zluda=ROOT/'zluda'
         os.environ['HIP_PATH']=str(ROOT/'hip')
         os.environ['ROCBLAS_TENSILE_LIBPATH']=str(hip/'rocblas'/'library')
-        for path in (hip,zluda):
+        runtime=resolve(ROOT)
+        for path in (runtime.parent,hip,zluda):
             HANDLES.append(os.add_dll_directory(str(path)))
         # The HIP runtime belongs to the installed AMD GPU driver, not this release.
-        HANDLES.append(ctypes.WinDLL(str(Path(os.environ['SystemRoot'])/'System32'/'amdhip64.dll')))
+        HANDLES.append(ctypes.WinDLL(str(runtime)))
+        # Forwarding shim requires its original backend in the same folder.
+        receipt=hip/'small-gemm-patch.json'
+        if receipt.exists() and json.loads(receipt.read_text(encoding='utf-8-sig')).get('enabled'):
+            HANDLES.append(ctypes.WinDLL(str(hip/'rocblas_backend.dll')))
         HANDLES.append(ctypes.WinDLL(str(hip/'rocblas.dll')))
         HANDLES.append(ctypes.WinDLL(str(zluda/'nvcuda.dll')))
     os.environ['DISABLE_ADDMM_CUDA_LT']='1'

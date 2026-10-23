@@ -1,0 +1,14 @@
+Source contribution handoff for aktalascloud/polaris-gfx803-rx580-zluda-rocm-hip-comfyui-windows.
+This source contribution is provided under GPL-3.0-only, matching the target project.
+See COPYING. Third-party runtimes/binaries are not included.
+
+The native small-GEMM code is a local Windows HIP 5.7 workaround inspired by:
+https://github.com/Schaka/rocm-gfx803/blob/8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78/patches/rocblas/small-gemm-assembly-miscompute.patch
+It is not a direct application of that Linux source patch to Windows.
+The native source files are copies of the source-machine implementation.
+The portable build/test helpers are adaptations prepared for this handoff.
+Historical numeric results are not a fresh target-machine validation.
+
+Original backend is acquired separately from its publisher:
+https://github.com/advanced-lvl-up/Rx470-Vega10-Rx580-gfx803-gfx900-fix-AMD-GPU/releases/tag/v1.0.0
+That binary and the AMD SDK/driver retain their own applicable terms.
