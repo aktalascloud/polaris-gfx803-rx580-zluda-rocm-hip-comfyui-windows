@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 [CmdletBinding()]
 param(
-    [ValidateSet('Auto','AMD','NVIDIA')][string]$Backend='Auto',
+    [ValidateSet('Auto','AMD')][string]$Backend='Auto',
     [string]$InstallRoot=(Join-Path (Split-Path $PSScriptRoot -Parent) 'runtime'),
     [string]$HipRoot='',
     [switch]$AcceptThirdPartyLicenses
@@ -21,10 +21,9 @@ if(Test-Path -LiteralPath $root){throw 'Choose a new installation folder. Existi
 if($Backend -eq 'Auto'){
     $names=@(Get-CimInstance Win32_VideoController | ForEach-Object {$_.Name}) -join ' '
     if($names -match 'RX\s*(470|480|570|580|590)'){$Backend='AMD'}
-    elseif($names -match 'NVIDIA|GeForce|Quadro|Tesla'){$Backend='NVIDIA'}
-    else{throw 'GPU not recognized. Only the AMD gfx803 profile has historical measurements. Select a profile explicitly.'}
+    else{throw 'This installer targets AMD Polaris/gfx803. For a compatible card not recognized by name, select -Backend AMD explicitly.'}
 }
-if($Backend -eq 'AMD' -and !(Test-Path -LiteralPath "$env:SystemRoot\System32\amdhip64.dll")){
+if(!(Test-Path -LiteralPath "$env:SystemRoot\System32\amdhip64.dll")){
     throw 'The installed AMD driver does not provide amdhip64.dll. This installer never installs or replaces a GPU driver.'
 }
 if(@('msvcp140.dll','msvcp140_1.dll','msvcp140_2.dll','vcruntime140_1.dll') | Where-Object {!(Test-Path -LiteralPath (Join-Path "$env:SystemRoot\System32" $_))}){
@@ -152,7 +151,7 @@ if($Backend -eq 'AMD'){
 }
 Copy-Item -LiteralPath (Join-Path $source 'tools') -Destination (Join-Path $root 'tools') -Recurse
 foreach($name in @('Start-ComfyUI.cmd','Start-Kobold.cmd','Python-CUDA.cmd','Python-ONNX.cmd','Download-Model.cmd')){Copy-Item -LiteralPath (Join-Path $source $name) -Destination (Join-Path $root $name)}
-@{backend=$Backend;version='0.1.0';comfy_commit='c0c011dca91b595091a4b032770da366fc90fb2b';models_included=$false} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $root 'profile.json') -Encoding UTF8
+@{backend=$Backend;version='0.1.1';architecture='Polaris/gfx803';comfy_commit='c0c011dca91b595091a4b032770da366fc90fb2b';models_included=$false} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $root 'profile.json') -Encoding UTF8
 New-Item -ItemType Directory -Path (Join-Path $root 'models'),(Join-Path $root 'temp') -Force | Out-Null
 Write-Host "Installed into $root. No GPU driver, inference, generation or benchmark was run."
 Write-Host 'Download your own licensed models from Hugging Face; see README.md.'

@@ -1,7 +1,7 @@
-# Pascal & RX580 AI on Windows — AVX2 · KoboldCPP · ZLUDA · ComfyUI
+# AMD Polaris / gfx803 / RX580 — AVX2 · KoboldCPP · ZLUDA · ComfyUI on Windows
 
-Pinned Windows recipes for **AMD RX 580 / Polaris gfx803** using ZLUDA/HIP and an
-**experimental, unmeasured NVIDIA Pascal** profile using native CUDA. Includes ComfyUI,
+Pinned Windows recipes for **AMD Polaris / gfx803 / RX580** using ZLUDA/HIP.
+The measured card is an RX580 2048SP with 8 GiB VRAM. Includes ComfyUI,
 KoboldCPP, ONNX Runtime DirectML and OpenVINO CPU.
 
 [Русское описание](README.ru.md) · [Patch catalogue](docs/PATCHES.md) ·
@@ -16,7 +16,7 @@ HybridMoE / Windows NUMA support, with its own releases and measurements.
 Its CPU/Vulkan results are separate from this repository's historical ZLUDA data;
 the percentages must not be combined or presented as the same experiment.
 
-Search terms: NVIDIA Pascal, AMD Radeon RX580 / RX 580, Polaris gfx803, AVX2,
+Search terms: AMD Polaris, gfx803, Radeon RX580 / RX 580, AVX2,
 Kobold / KoboldCPP, ZLUDA, ComfyUI, HIP / ROCm, CUDA 11.8, DirectML, OpenVINO.
 AVX2 is an instruction set supported by the reference CPU and used by the related optimized fork;
 no isolated AVX2 patch gain was measured in this repository.
@@ -48,7 +48,6 @@ The driver was preserved. This project does not install or update GPU drivers.
 | DirectML 1.24.4 | Physical Radeon inference passed earlier, CPU fallback disabled |
 | OpenVINO 2026.4.1 | CPU passed earlier; **Ellesmere GPU returned incorrect zeros** |
 | ComfyUI-Zluda, commit `c0c011dca91b595091a4b032770da366fc90fb2b` | Installed only; **not launched or validated through image generation** |
-| NVIDIA Pascal | Native CUDA 11.8 recipe only; **no Pascal measurements** |
 
 **No new model generations or GPU benchmarks were run to publish this project.**
 The online installer itself has not undergone a fresh end-to-end installation
@@ -84,12 +83,12 @@ Separate simple controls returned `4`, `63`, and `Paris` correctly.
 
 [Paired numeric data](data/paired-latency.csv) · [Token-count/rate data](data/decode.csv).
 The 2–3-token controls reached 12.50–16.39 tokens/s, but are too short to advertise
-as throughput. **No per-patch percentage, ComfyUI images/s or Pascal tokens/s was measured.**
+as throughput. **No per-patch percentage or ComfyUI images/s was measured.**
 
 ## Windows release / install
 
-Download the `legacy-gpu-ai-windows-…-windows-setup.zip` asset from
-[Releases](https://github.com/aktalascloud/pascal-rx580-avx2-koboldcpp-zluda-comfyui-windows/releases), extract
+Download the `polaris-gfx803-windows-setup-v0.1.1.zip` asset from
+[Releases](https://github.com/aktalascloud/polaris-gfx803-rx580-avx2-koboldcpp-zluda-comfyui-windows/releases), extract
 it into a short writable path, read the third-party notices, then run `Install.cmd`.
 
 The release is a **small online installer**, not the original private/offline
@@ -107,10 +106,6 @@ may need additional local permissions; it is not a GPU-driver installation.
 
 # Optional: use an existing HIP SDK 5.7.1 as the source of a fresh local copy.
 .\Install.cmd -Backend AMD -HipRoot "C:\Program Files\AMD\ROCm\5.7" -AcceptThirdPartyLicenses
-
-# NVIDIA Pascal: native CUDA, no ZLUDA DLL replacement or HIP download.
-# This path is unmeasured, not a tested Pascal performance claim.
-.\Install.cmd -Backend NVIDIA -AcceptThirdPartyLicenses
 ```
 
 `-AcceptThirdPartyLicenses` is an explicit acknowledgement to review and comply
@@ -146,7 +141,7 @@ checkpoint download, manager installation or custom-node auto-update.
   enabled. Normal batching produced incorrect text; this is a correctness workaround.
 - Use the matched gfx803 rocBLAS **DLL and its kernel library** together.
 - ZLUDA 3.9.5, Torch 2.2.1+cu118 and NumPy 1.26.4 are pinned. Do not `pip install -U torch`.
-- Disable cuDNN/TF32/unsupported attention paths on AMD. NVIDIA uses native CUDA.
+- Disable cuDNN/TF32/unsupported attention paths in the Polaris profile.
 - Tiny batched GEMM `[3,1,2] × [3,2,1]` has no Tensile solution in this library.
 - Wave64 slow mode and MMQ failed earlier. Full 250-convolution Torch inference
   was not confirmed. See the [patch catalogue](docs/PATCHES.md).

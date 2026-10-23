@@ -1,7 +1,7 @@
-# Pascal / RX580 / AVX2 — KoboldCPP, ZLUDA и ComfyUI для Windows
+# AMD Polaris / gfx803 / RX580 — AVX2, KoboldCPP, ZLUDA и ComfyUI для Windows
 
-Закреплённый набор ZLUDA/HIP для **AMD RX580 2048SP, gfx803, 8 ГБ** и отдельный
-**непроверенный** профиль NVIDIA Pascal с нативной CUDA 11.8. Компоненты: ComfyUI,
+Закреплённый набор ZLUDA/HIP для **AMD Polaris / gfx803 / RX580**.
+Замеры получены на RX580 2048SP с 8 ГБ видеопамяти. Компоненты: ComfyUI,
 KoboldCPP, PyTorch, ONNX Runtime DirectML, OpenVINO CPU.
 
 ## Моя оптимизированная сборка KoboldCPP
@@ -13,7 +13,7 @@ KoboldCPP, PyTorch, ONNX Runtime DirectML, OpenVINO CPU.
 Эти результаты нельзя складывать с процентами ZLUDA из таблицы ниже:
 это разные эксперименты и сборки.
 
-Для поиска: NVIDIA Pascal (Паскаль), Radeon RX580 / РХ580, Polaris gfx803,
+Для поиска: AMD Polaris (Поларис), gfx803, Radeon RX580 / РХ580,
 AVX2, KoboldCPP (Коболд), ZLUDA (Злуда), ComfyUI (КомфиУИ), HIP / ROCm,
 CUDA 11.8, DirectML, OpenVINO. AVX2 — набор инструкций исходного CPU и одно
 из направлений оптимизации связанного форка; отдельный прирост от AVX2
@@ -66,17 +66,15 @@ CUDA 11.8, DirectML, OpenVINO. AVX2 — набор инструкций исхо
 не публикуются. Доступны только [числовая таблица](data/paired-latency.csv)
 и [количество токенов и скорости](data/decode.csv).
 
-**Нет замеров прироста от отдельных патчей, сравнения с Vulkan, скорости
-декодирования на Pascal или генерации изображений в ComfyUI.**
-ComfyUI была установлена, но не запускалась. Для Pascal приведён
-экспериментальный профиль с нативной CUDA; на реальной карте он не проверялся.
+**Нет замеров прироста от отдельных патчей, сравнения с Vulkan или скорости
+генерации изображений в ComfyUI.** ComfyUI была установлена, но не запускалась.
 
 ## Установка из релиза
 
-1. Скачать установочный ZIP из [Releases](https://github.com/aktalascloud/pascal-rx580-avx2-koboldcpp-zluda-comfyui-windows/releases).
+1. Скачать установочный ZIP из [Releases](https://github.com/aktalascloud/polaris-gfx803-rx580-avx2-koboldcpp-zluda-comfyui-windows/releases).
 2. Распаковать в доступную для записи папку с коротким путём.
 3. Прочитать [лицензии и первоисточники](THIRD_PARTY_NOTICES.md).
-4. Запустить `Install.cmd` и выбрать или указать профиль AMD либо NVIDIA.
+4. Запустить `Install.cmd` и использовать профиль AMD Polaris / gfx803.
 5. После установки пользоваться файлами запуска внутри созданной папки `runtime`.
 
 Это **небольшой онлайн-установщик**, а не публикация личного офлайн-архива.
@@ -87,7 +85,6 @@ ComfyUI была установлена, но не запускалась. Дл�
 
 ```powershell
 .\Install.cmd -Backend AMD -AcceptThirdPartyLicenses
-.\Install.cmd -Backend NVIDIA -AcceptThirdPartyLicenses
 # Необязательный источник HIP 5.7.1: SDK копируется, системная установка не изменяется.
 .\Install.cmd -Backend AMD -HipRoot "C:\Program Files\AMD\ROCm\5.7" -AcceptThirdPartyLicenses
 ```

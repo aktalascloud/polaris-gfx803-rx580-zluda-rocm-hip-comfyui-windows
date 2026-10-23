@@ -9,6 +9,7 @@ $root=Split-Path $PSScriptRoot -Parent
 $profileFile=Join-Path $root 'profile.json'
 if(!(Test-Path -LiteralPath $profileFile)){throw 'Run Install.cmd first. Launchers inside the installed runtime folder are the usable copies.'}
 $backend=(Get-Content -LiteralPath $profileFile -Raw | ConvertFrom-Json).backend
+if($backend -ne 'AMD'){throw 'This package targets AMD Polaris/gfx803 only'}
 $python=Join-Path $root 'envs\cuda\python.exe'
 $env:CUDA_MODULE_LOADING='LAZY'
 $env:ZLUDA_WAVE64_SLOW_MODE='0'
@@ -41,6 +42,5 @@ if($App -eq 'Comfy'){
     $arguments=@('-I',(Join-Path $PSScriptRoot 'run_python.py'))
 }
 $arguments+=@($ExtraArguments)
-if($backend -eq 'AMD'){& (Join-Path $root 'zluda\zluda.exe') -- $python @arguments}
-else{& $python @arguments}
+& (Join-Path $root 'zluda\zluda.exe') -- $python @arguments
 exit $LASTEXITCODE

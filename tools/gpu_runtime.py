@@ -10,6 +10,8 @@ HANDLES=[]
 
 def configure():
     backend=json.loads((ROOT/'profile.json').read_text(encoding='utf-8-sig'))['backend']
+    if backend!='AMD':
+        raise RuntimeError('This package targets AMD Polaris/gfx803 only')
     if backend=='AMD':
         hip=ROOT/'hip'/'bin'
         zluda=ROOT/'zluda'
@@ -27,7 +29,7 @@ def configure():
 def torch_profile():
     backend=configure()
     import torch
-    torch.backends.cudnn.enabled=backend!='AMD'
+    torch.backends.cudnn.enabled=False
     torch.backends.cuda.matmul.allow_tf32=False
     torch.backends.cudnn.allow_tf32=False
     if backend=='AMD' and hasattr(torch.backends.cuda,'preferred_blas_library'):

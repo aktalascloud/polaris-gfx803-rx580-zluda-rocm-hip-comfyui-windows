@@ -35,8 +35,8 @@ replacements and were not applied to CUDA PyTorch here. Their reported Linux
 speedups are **not measurements from this project**. The Windows reuse probe
 passed 60 BMM/copy iterations; LayerNorm/Softmax widths 1024/2560/9728 also passed.
 
-## Pascal
+## Target architecture
 
-Pascal uses native CUDA, not ZLUDA or AMD rocBLAS. No Pascal card was measured in
-this session. Do not infer Pascal token rates, percentage gains, successful
-ComfyUI generation, or universal driver support from the RX580 findings.
+This package targets **AMD Polaris / gfx803 / RX580**. The historical hardware
+measurements were made on one RX580 2048SP with 8 GiB VRAM. Other cards and
+drivers are not automatically certified; no other GPU-family profile is included.

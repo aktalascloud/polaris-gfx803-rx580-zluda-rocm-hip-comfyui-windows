@@ -10,10 +10,10 @@ set "CUDA_MODULE_LOADING=LAZY"
 if not exist "%TEMP%" mkdir "%TEMP%"
 findstr /c:"AMD" "%~dp0profile.json" >nul
 if errorlevel 1 (
-  "%~dp0envs\cuda\python.exe" -I "%~dp0tools\run_python.py" %*
-) else (
-  set "HIP_PATH=%~dp0hip"
-  set "PATH=%~dp0hip\bin;%~dp0zluda;%PATH%"
-  "%~dp0zluda\zluda.exe" -- "%~dp0envs\cuda\python.exe" -I "%~dp0tools\run_python.py" %*
+  echo This package targets AMD Polaris/gfx803 only.
+  exit /b 1
 )
+set "HIP_PATH=%~dp0hip"
+set "PATH=%~dp0hip\bin;%~dp0zluda;%PATH%"
+"%~dp0zluda\zluda.exe" -- "%~dp0envs\cuda\python.exe" -I "%~dp0tools\run_python.py" %*
 exit /b %ERRORLEVEL%
