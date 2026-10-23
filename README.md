@@ -5,7 +5,7 @@ A general-purpose local AI backend toolkit, with optional ComfyUI-Zluda.
 
 ## Install
 
-1. Download the setup ZIP from [Releases](https://github.com/aktalascloud/polaris-gfx803-rx580-zluda-rocm-hip-comfyui-windows/releases/tag/v0.2.1), extract into a short writable folder such as `C:\AI\Polaris-Setup`.
+1. Download the setup ZIP from [Releases](https://github.com/aktalascloud/polaris-gfx803-rx580-zluda-rocm-hip-comfyui-windows/releases/tag/v0.3.0), extract into a short writable folder such as `C:\AI\Polaris-Setup`.
 2. Double-click **Install.cmd**, choose whether to include ComfyUI (Enter = yes), and accept the linked vendor terms.
 3. Setup downloads and installs all pinned Python packages, ZLUDA, HIP SDK, patched rocBLAS and matching gfx803 kernel blobs automatically. It installs the signed Microsoft VC++ x64 runtime if missing; Windows may request administrator consent.
 4. If selected, ComfyUI receives its dependencies and startup patch automatically, plus a **ComfyUI - Polaris ZLUDA** desktop shortcut. It is not started during setup.
@@ -31,7 +31,7 @@ Models are not included or downloaded automatically. Obtain appropriately licens
 
 ## Optional source contribution: small GEMM, Torch DirectML and diagnostics
 
-The contribution branch adds **`-WithSmallGemmPatch`** and **`-WithTorchDirectML`**,
+Release v0.3.0 adds **`-WithSmallGemmPatch`** and **`-WithTorchDirectML`**,
 both opt-in, plus a model-free **Check-Zluda.cmd** and read-only DLL diagnostics.
 The native fix handles tiny FP32 GEMMs (dimensions 1–8) on tested Polaris device 0;
 other operations retain the matched original backend. It is not a complete ROCm

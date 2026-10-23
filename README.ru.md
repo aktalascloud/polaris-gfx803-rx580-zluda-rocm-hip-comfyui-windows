@@ -5,7 +5,7 @@
 
 ## Установка
 
-1. Скачайте ZIP из [Releases](https://github.com/aktalascloud/polaris-gfx803-rx580-zluda-rocm-hip-comfyui-windows/releases/tag/v0.2.1), распакуйте, например, в `C:\AI\Polaris-Setup`.
+1. Скачайте ZIP из [Releases](https://github.com/aktalascloud/polaris-gfx803-rx580-zluda-rocm-hip-comfyui-windows/releases/tag/v0.3.0), распакуйте, например, в `C:\AI\Polaris-Setup`.
 2. Запустите **Install.cmd**. Выберите установку ComfyUI (Enter — да) и подтвердите условия сторонних компонентов.
 3. Установщик автоматически скачает ZLUDA, HIP SDK, патченный rocBLAS с подходящими gfx803 blobs и все закреплённые Python-зависимости. Если отсутствует Microsoft VC++ x64 Runtime, установит официальный пакет с проверкой подписи. Windows может запросить права администратора.
 4. Для ComfyUI автоматически применит патч запуска, установит зависимости и создаст ярлык **ComfyUI - Polaris ZLUDA** на рабочем столе.
@@ -34,7 +34,7 @@
 
 ## Опциональное исправление GEMM, PyTorch DirectML и диагностика
 
-Добавлены флаги **`-WithSmallGemmPatch`** и **`-WithTorchDirectML`**, оба выключены
+В релизе v0.3.0 добавлены флаги **`-WithSmallGemmPatch`** и **`-WithTorchDirectML`**, оба выключены
 по умолчанию. Small-GEMM исправляет маленькие FP32 GEMM с размерами 1–8 на
 проверенном Polaris device 0. Остальные операции передаются исходному backend.
 Это не полный перенос ROCm и не обещание ускорения генерации.
