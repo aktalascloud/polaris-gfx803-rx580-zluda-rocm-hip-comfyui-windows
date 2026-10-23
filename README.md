@@ -1,4 +1,4 @@
-# Legacy GPU AI on Windows
+# Pascal & RX580 AI on Windows — AVX2 · KoboldCPP · ZLUDA · ComfyUI
 
 Pinned Windows recipes for **AMD RX 580 / Polaris gfx803** using ZLUDA/HIP and an
 **experimental, unmeasured NVIDIA Pascal** native-CUDA profile. Includes ComfyUI,
@@ -6,6 +6,20 @@ KoboldCPP, ONNX Runtime DirectML and OpenVINO CPU.
 
 [Русское описание](README.ru.md) · [Patch catalogue](docs/PATCHES.md) ·
 [Third-party terms and source links](THIRD_PARTY_NOTICES.md)
+
+## Optimized KoboldCPP: AVX2 / Vulkan / NUMA
+
+For the author's separately optimized CPU/Vulkan build, see
+[KoboldCpp AVX2 / Vulkan / NUMA](https://github.com/aktalascloud/koboldcpp-avx2-vulkan-numa).
+That project contains Haswell AVX2 PGO/LTO work, RX580 Vulkan tuning and optional
+HybridMoE / Windows NUMA support, with its own releases and measurements.
+Its CPU/Vulkan results are separate from this repository's historical ZLUDA data;
+the percentages must not be combined or presented as the same experiment.
+
+Search terms: NVIDIA Pascal, AMD Radeon RX580 / RX 580, Polaris gfx803, AVX2,
+Kobold / KoboldCPP, ZLUDA, ComfyUI, HIP / ROCm, CUDA 11.8, DirectML, OpenVINO.
+AVX2 describes the reference CPU capability and the related optimized fork;
+no isolated AVX2 patch gain was measured in this repository.
 
 ## What is actually verified
 
@@ -61,7 +75,7 @@ as throughput. **No per-patch percentage, ComfyUI images/s or Pascal tokens/s wa
 ## Windows release / install
 
 Download the `legacy-gpu-ai-windows-…-windows-setup.zip` asset from
-[Releases](https://github.com/aktalascloud/legacy-gpu-ai-windows/releases), extract
+[Releases](https://github.com/aktalascloud/pascal-rx580-avx2-koboldcpp-zluda-comfyui-windows/releases), extract
 it into a short writable path, read the third-party notices, then run `Install.cmd`.
 
 The release is a **small online installer**, not the original private/offline

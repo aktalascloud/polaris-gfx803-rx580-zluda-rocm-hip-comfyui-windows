@@ -1,8 +1,21 @@
-# AI на старых GPU в Windows: RX580 / Polaris и Pascal
+# Pascal / RX580 / AVX2 — KoboldCPP, ZLUDA и ComfyUI для Windows
 
 Закреплённый набор ZLUDA/HIP для **AMD RX580 2048SP, gfx803, 8 ГБ** и отдельный
 **непроверенный** рецепт NVIDIA Pascal с нативной CUDA 11.8. Компоненты: ComfyUI,
 KoboldCPP, PyTorch, ONNX Runtime DirectML, OpenVINO CPU.
+
+## Моя оптимизированная сборка KoboldCPP
+
+[KoboldCpp AVX2 / Vulkan / NUMA](https://github.com/aktalascloud/koboldcpp-avx2-vulkan-numa) — отдельный репозиторий автора:
+Haswell AVX2, PGO/LTO, настройка Vulkan для RX580, необязательные HybridMoE
+и Windows NUMA. У него собственные релизы и замеры CPU/Vulkan.
+Их результаты нельзя складывать с процентами ZLUDA из таблицы ниже:
+это разные эксперименты и сборки.
+
+Для поиска: NVIDIA Pascal (Паскаль), Radeon RX580 / РХ580, Polaris gfx803,
+AVX2, KoboldCPP (Коболд), ZLUDA (Злуда), ComfyUI (КомфиУИ), HIP / ROCm,
+CUDA 11.8, DirectML, OpenVINO. AVX2 — возможность исходного CPU и направление
+связанного форка; отдельный прирост от AVX2 в этом репозитории не измерялся.
 
 ## Какие результаты есть
 
@@ -40,7 +53,7 @@ Pascal включён как экспериментальный нативный
 
 ## Установка из релиза
 
-1. Скачать установочный ZIP из [Releases](https://github.com/aktalascloud/legacy-gpu-ai-windows/releases).
+1. Скачать установочный ZIP из [Releases](https://github.com/aktalascloud/pascal-rx580-avx2-koboldcpp-zluda-comfyui-windows/releases).
 2. Распаковать в короткий доступный для записи путь.
 3. Прочитать [лицензии и первоисточники](THIRD_PARTY_NOTICES.md).
 4. Запустить `Install.cmd`, выбрать/передать профиль AMD или NVIDIA.
