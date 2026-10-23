@@ -32,7 +32,7 @@ not throughput measurements or certification for arbitrary shapes/applications.
 
 ## Excluded candidates and research
 
-- likelovewant v0.5.7 gfx803-optic, gfx803-vega-fallback and common HIP5.7 candidates failed previous numerical checks; they are not installed.
+- likelovewant v0.5.7 candidates were rejected earlier. The [2026-10-23 retry](BLOB-RETRY-2026-10-23.md) found optic passes selected cases but crashes on repeat and with application BLAS batch 512; vega and partial DLL/kernel mixes fail. None is installed automatically.
 - Tiny batched GEMM still has unsupported shapes/no Tensile solution.
 - OpenVINO Ellesmere GPU returned incorrect zeros; use OpenVINO CPU.
 - [Schaka/rocm-gfx803](https://github.com/Schaka/rocm-gfx803) Linux Wave64/small-GEMM/TC-coherence patches were studied, not applied to Windows HIP DLLs. Linux speedups must not be attributed to this package.
@@ -40,3 +40,7 @@ not throughput measurements or certification for arbitrary shapes/applications.
 
 The installed toolkit already applies the required Windows overrides. The repository
 ships source patches and pinned acquisition logic, not a mirror of third-party binaries.
+
+## Fresh isolated patch comparison
+
+[2026-10-23 methods and tables](BLOB-RETRY-2026-10-23.md) include two matched baseline FP32/FP16 runs, full optic/vega candidates, four partial swaps, diffusion-like FP32 GEMMs and controlled/practical Vulkan comparisons. These tests do not identify a safe faster rocBLAS replacement. The default patch set remains unchanged. Per-component percentages in the retry concern named GEMM shapes; application ratios are explicitly whole-configuration measurements.

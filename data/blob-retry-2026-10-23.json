@@ -1,0 +1,2426 @@
+{
+  "date": "2026-10-23",
+  "hardware": {
+    "gpu": "RX580 2048SP",
+    "architecture": "Polaris/gfx803",
+    "vram_gib": 8,
+    "cpu": "Xeon E5-2696 v3",
+    "driver": "31.0.14037.18001"
+  },
+  "stack": {
+    "hip": "5.7.1",
+    "zluda": "3.9.5",
+    "torch": "2.2.1+cu118"
+  },
+  "sources": {
+    "baseline_archive_sha256": "5a21cc7197d45d33064f4d7603e55f0fd51f0dbc04065228d0185c4f36b5b629",
+    "likelovewant_release": "https://github.com/likelovewant/ROCmLibs-for-gfx1103-AMD780M-APU/releases/tag/v0.5.7",
+    "optic_archive_sha256": "a054273d4be458bb2bca379fa911f0f4a4fcddf1333a69afcc9c9f568826c0b7",
+    "vega_archive_sha256": "421418a3430f804712e364825f18849008ba50bbc57ad97865cda8eca53b3497"
+  },
+  "methodology": {
+    "warmup_gemms": 5,
+    "timing_samples": 7,
+    "gemms_per_sample": 5,
+    "gpu_synchronization": true,
+    "timing_excludes": "CPU reference, transfers and initial compilation; each timed sample includes its final GPU synchronization",
+    "fp32_atol": 5e-05,
+    "fp32_rtol": 0.0002,
+    "fp16_atol": 0.0625,
+    "fp16_rtol": 0.02,
+    "matrix_shapes": "[m,n,k] means A[m,k] @ B[k,n]",
+    "sd_shapes_scope": "Dense GEMM shapes inspired by diffusion workloads; not an actual ComfyUI graph or image-generation measurement",
+    "limitations": [
+      "Single RX580 and driver; small sample count; not randomized across all configurations",
+      "Model API fixture uses synthetic prompts with a 128-token maximum; actual token counts are recorded",
+      "Common prompt-prefix caching and background desktop services were not disabled",
+      "CUDA and Vulkan native libraries differ; oldpc Vulkan DLL is explicitly the noavx2 build",
+      "Current optimized Vulkan comparison changes application version, GPU-layer count, CPU threads, batch policy and custom kernels; it is a practical configuration comparison, not an isolated backend/patch gain"
+    ],
+    "fp32_criterion": "Elementwise torch.allclose against CPU FP32 reference; limits explicitly recorded",
+    "fp16_criterion": "Elementwise torch.allclose against CPU FP32 multiplication of quantized FP16 inputs, then rounded to FP16; not exact bitwise equality"
+  },
+  "numeric_first_pass": [
+    {
+      "profile": "baseline",
+      "return_code": 0,
+      "dll_sha256": "9e88918e65b81eeb128c69cd7a96ab495b101daf51f6f78f943445d7d4c5f70d",
+      "records": [
+        {
+          "profile": "baseline",
+          "stage": "libraries_loaded"
+        },
+        {
+          "profile": "baseline",
+          "stage": "device",
+          "torch": "2.2.1+cu118",
+          "device": "AMD Radeon RX 580 2048SP [ZLUDA]",
+          "free_vram": 8455716864,
+          "total_vram": 8589934592
+        },
+        {
+          "profile": "baseline",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            127,
+            65,
+            96
+          ],
+          "max_abs_error": 7.152557373046875e-07,
+          "rms_error": 1.11652397549733e-07,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "baseline",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            127,
+            65,
+            96
+          ],
+          "median_ms": 0.141940001049079,
+          "samples_ms": [
+            0.1441000000340864,
+            0.14149999769870192,
+            0.14199999859556556,
+            0.1401800021994859,
+            0.13947999977972358,
+            0.14436000201385468,
+            0.141940001049079
+          ]
+        },
+        {
+          "profile": "baseline",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            2560,
+            21,
+            2560
+          ],
+          "max_abs_error": 3.147125244140625e-05,
+          "rms_error": 3.955676675104769e-06,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "baseline",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            2560,
+            21,
+            2560
+          ],
+          "median_ms": 0.9338200005004182,
+          "samples_ms": [
+            0.9338200005004182,
+            0.9109599981456995,
+            0.9508600021945313,
+            0.9546199988108128,
+            0.9150999976554886,
+            0.9144599986029789,
+            0.9347000013804063
+          ]
+        },
+        {
+          "profile": "baseline",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            9728,
+            21,
+            2560
+          ],
+          "max_abs_error": 3.719329833984375e-05,
+          "rms_error": 3.972884314862313e-06,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "baseline",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            9728,
+            21,
+            2560
+          ],
+          "median_ms": 2.0726799994008616,
+          "samples_ms": [
+            2.0814599993173033,
+            2.081499999621883,
+            2.0578800002112985,
+            2.0706599985715,
+            2.066999999806285,
+            2.0726799994008616,
+            2.0769199996721
+          ]
+        },
+        {
+          "profile": "baseline",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            512,
+            512,
+            512
+          ],
+          "max_abs_error": 8.106231689453125e-06,
+          "rms_error": 8.304381253765314e-07,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "baseline",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            512,
+            512,
+            512
+          ],
+          "median_ms": 0.24993999977596104,
+          "samples_ms": [
+            0.26396000175736845,
+            0.26387999823782593,
+            0.2615399978822097,
+            0.24993999977596104,
+            0.24846000014804304,
+            0.24491999938618392,
+            0.23743999772705138
+          ]
+        },
+        {
+          "profile": "baseline",
+          "stage": "numeric",
+          "dtype": "torch.float16",
+          "shape": [
+            127,
+            65,
+            96
+          ],
+          "max_abs_error": 0.0,
+          "rms_error": 0.0,
+          "atol": 0.0625,
+          "rtol": 0.02,
+          "status": "PASS"
+        },
+        {
+          "profile": "baseline",
+          "stage": "timing",
+          "dtype": "torch.float16",
+          "shape": [
+            127,
+            65,
+            96
+          ],
+          "median_ms": 0.19783999887295067,
+          "samples_ms": [
+            0.1973200007341802,
+            0.19783999887295067,
+            0.21145999780856073,
+            0.21451999782584608,
+            0.2118400007020682,
+            0.18557999865151942,
+            0.17776000022422522
+          ]
+        },
+        {
+          "profile": "baseline",
+          "stage": "numeric",
+          "dtype": "torch.float16",
+          "shape": [
+            2560,
+            21,
+            2560
+          ],
+          "max_abs_error": 0.0078125,
+          "rms_error": 9.523777407594025e-05,
+          "atol": 0.0625,
+          "rtol": 0.02,
+          "status": "PASS"
+        },
+        {
+          "profile": "baseline",
+          "stage": "timing",
+          "dtype": "torch.float16",
+          "shape": [
+            2560,
+            21,
+            2560
+          ],
+          "median_ms": 0.9722999995574355,
+          "samples_ms": [
+            0.9721599984914064,
+            0.9668000013334677,
+            0.9771600016392767,
+            0.9799199993722141,
+            0.9739600005559623,
+            0.9722999995574355,
+            0.9690000006230548
+          ]
+        },
+        {
+          "profile": "baseline",
+          "stage": "numeric",
+          "dtype": "torch.float16",
+          "shape": [
+            9728,
+            21,
+            2560
+          ],
+          "max_abs_error": 0.0078125,
+          "rms_error": 9.27204528125003e-05,
+          "atol": 0.0625,
+          "rtol": 0.02,
+          "status": "PASS"
+        },
+        {
+          "profile": "baseline",
+          "stage": "timing",
+          "dtype": "torch.float16",
+          "shape": [
+            9728,
+            21,
+            2560
+          ],
+          "median_ms": 2.335020000464283,
+          "samples_ms": [
+            2.342700000735931,
+            2.3329000017838553,
+            2.3319999978411943,
+            2.3399399971822277,
+            2.335020000464283,
+            2.3256199987372383,
+            2.3629600007552654
+          ]
+        },
+        {
+          "profile": "baseline",
+          "stage": "numeric",
+          "dtype": "torch.float16",
+          "shape": [
+            512,
+            512,
+            512
+          ],
+          "max_abs_error": 0.001953125,
+          "rms_error": 2.5294521037722006e-05,
+          "atol": 0.0625,
+          "rtol": 0.02,
+          "status": "PASS"
+        },
+        {
+          "profile": "baseline",
+          "stage": "timing",
+          "dtype": "torch.float16",
+          "shape": [
+            512,
+            512,
+            512
+          ],
+          "median_ms": 0.30094000103417784,
+          "samples_ms": [
+            0.3330400009872392,
+            0.3140600019833073,
+            0.30423999996855855,
+            0.30094000103417784,
+            0.29288000077940524,
+            0.2946599997812882,
+            0.2945000014733523
+          ]
+        },
+        {
+          "profile": "baseline",
+          "stage": "complete",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "profile": "optic-full",
+      "return_code": 0,
+      "dll_sha256": "f9aa06ea46d7b84c8fbc8682c15f8972b31b322ed8f020a355af60811ed52f4b",
+      "records": [
+        {
+          "profile": "optic-full",
+          "stage": "libraries_loaded"
+        },
+        {
+          "profile": "optic-full",
+          "stage": "device",
+          "torch": "2.2.1+cu118",
+          "device": "AMD Radeon RX 580 2048SP [ZLUDA]",
+          "free_vram": 8455716864,
+          "total_vram": 8589934592
+        },
+        {
+          "profile": "optic-full",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            127,
+            65,
+            96
+          ],
+          "max_abs_error": 7.152557373046875e-07,
+          "rms_error": 4.704104838992862e-08,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "optic-full",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            127,
+            65,
+            96
+          ],
+          "median_ms": 0.1345600001513958,
+          "samples_ms": [
+            0.13885999796912074,
+            0.13513999874703586,
+            0.13432000123430043,
+            0.14204000181052834,
+            0.1345600001513958,
+            0.13392000109888613,
+            0.13288000191096216
+          ]
+        },
+        {
+          "profile": "optic-full",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            2560,
+            21,
+            2560
+          ],
+          "max_abs_error": 2.86102294921875e-05,
+          "rms_error": 3.934553205908742e-06,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "optic-full",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            2560,
+            21,
+            2560
+          ],
+          "median_ms": 2.1062999992864206,
+          "samples_ms": [
+            2.108499998576008,
+            2.1058600017568097,
+            2.328660001512617,
+            2.1162799996091053,
+            2.1062999992864206,
+            2.0999199972720817,
+            2.1013199992012233
+          ]
+        },
+        {
+          "profile": "optic-full",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            9728,
+            21,
+            2560
+          ],
+          "max_abs_error": 8.58306884765625e-06,
+          "rms_error": 1.7316501725872513e-06,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "optic-full",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            9728,
+            21,
+            2560
+          ],
+          "median_ms": 2.0731600001454353,
+          "samples_ms": [
+            2.0697599975392222,
+            2.0766999979969114,
+            2.0863200013991445,
+            2.065380002022721,
+            2.0829399989452213,
+            2.0731600001454353,
+            2.0698999986052513
+          ]
+        },
+        {
+          "profile": "optic-full",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            512,
+            512,
+            512
+          ],
+          "max_abs_error": 5.7220458984375e-06,
+          "rms_error": 6.705567443532345e-07,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "optic-full",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            512,
+            512,
+            512
+          ],
+          "median_ms": 0.3785800014156848,
+          "samples_ms": [
+            0.3808000008575618,
+            0.38025999965611845,
+            0.377959999605082,
+            0.3771999996388331,
+            0.3794799995375797,
+            0.3785800014156848,
+            0.36835999926552176
+          ]
+        },
+        {
+          "profile": "optic-full",
+          "stage": "numeric",
+          "dtype": "torch.float16",
+          "shape": [
+            127,
+            65,
+            96
+          ],
+          "max_abs_error": 0.0,
+          "rms_error": 0.0,
+          "atol": 0.0625,
+          "rtol": 0.02,
+          "status": "PASS"
+        },
+        {
+          "profile": "optic-full",
+          "stage": "timing",
+          "dtype": "torch.float16",
+          "shape": [
+            127,
+            65,
+            96
+          ],
+          "median_ms": 0.13781999878119677,
+          "samples_ms": [
+            0.1420399989001453,
+            0.13996000052429736,
+            0.13789999939035624,
+            0.137640000320971,
+            0.13694000081159174,
+            0.13781999878119677,
+            0.13726000033784658
+          ]
+        },
+        {
+          "profile": "optic-full",
+          "stage": "numeric",
+          "dtype": "torch.float16",
+          "shape": [
+            2560,
+            21,
+            2560
+          ],
+          "max_abs_error": 0.0078125,
+          "rms_error": 9.523777407594025e-05,
+          "atol": 0.0625,
+          "rtol": 0.02,
+          "status": "PASS"
+        },
+        {
+          "profile": "optic-full",
+          "stage": "timing",
+          "dtype": "torch.float16",
+          "shape": [
+            2560,
+            21,
+            2560
+          ],
+          "median_ms": 1.1195400002179667,
+          "samples_ms": [
+            1.1203400004887953,
+            1.1195400002179667,
+            1.1244399996940047,
+            1.1206600000150502,
+            1.117720000911504,
+            1.1169400007929653,
+            1.1171799997100607
+          ]
+        },
+        {
+          "profile": "optic-full",
+          "stage": "numeric",
+          "dtype": "torch.float16",
+          "shape": [
+            9728,
+            21,
+            2560
+          ],
+          "max_abs_error": 0.0078125,
+          "rms_error": 9.27204528125003e-05,
+          "atol": 0.0625,
+          "rtol": 0.02,
+          "status": "PASS"
+        },
+        {
+          "profile": "optic-full",
+          "stage": "timing",
+          "dtype": "torch.float16",
+          "shape": [
+            9728,
+            21,
+            2560
+          ],
+          "median_ms": 3.1479199999012053,
+          "samples_ms": [
+            3.14823999942746,
+            3.14428000128828,
+            3.145760000916198,
+            3.148139998666011,
+            3.1434799981070682,
+            3.1479199999012053,
+            3.14827999973204
+          ]
+        },
+        {
+          "profile": "optic-full",
+          "stage": "numeric",
+          "dtype": "torch.float16",
+          "shape": [
+            512,
+            512,
+            512
+          ],
+          "max_abs_error": 0.00390625,
+          "rms_error": 2.7206564482185058e-05,
+          "atol": 0.0625,
+          "rtol": 0.02,
+          "status": "PASS"
+        },
+        {
+          "profile": "optic-full",
+          "stage": "timing",
+          "dtype": "torch.float16",
+          "shape": [
+            512,
+            512,
+            512
+          ],
+          "median_ms": 0.27683999796863645,
+          "samples_ms": [
+            0.30245999805629253,
+            0.2993399975821376,
+            0.2798600005917251,
+            0.27507999911904335,
+            0.27427999884821475,
+            0.27683999796863645,
+            0.274840000201948
+          ]
+        },
+        {
+          "profile": "optic-full",
+          "stage": "complete",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "profile": "vega-full",
+      "return_code": 3221225477,
+      "dll_sha256": "d12cb6b308763a5cc3e8299bbc5bdab3d2bf90c4ac0839e335bee09fba783cef",
+      "records": [
+        {
+          "profile": "vega-full",
+          "stage": "libraries_loaded"
+        },
+        {
+          "profile": "vega-full",
+          "stage": "device",
+          "torch": "2.2.1+cu118",
+          "device": "AMD Radeon RX 580 2048SP [ZLUDA]",
+          "free_vram": 8455716864,
+          "total_vram": 8589934592
+        }
+      ]
+    },
+    {
+      "profile": "baseline-dll-optic-kernels",
+      "return_code": 3221225477,
+      "dll_sha256": "9e88918e65b81eeb128c69cd7a96ab495b101daf51f6f78f943445d7d4c5f70d",
+      "records": [
+        {
+          "profile": "baseline-dll-optic-kernels",
+          "stage": "libraries_loaded"
+        },
+        {
+          "profile": "baseline-dll-optic-kernels",
+          "stage": "device",
+          "torch": "2.2.1+cu118",
+          "device": "AMD Radeon RX 580 2048SP [ZLUDA]",
+          "free_vram": 8455716864,
+          "total_vram": 8589934592
+        }
+      ]
+    },
+    {
+      "profile": "baseline-dll-vega-kernels",
+      "return_code": 3221225477,
+      "dll_sha256": "9e88918e65b81eeb128c69cd7a96ab495b101daf51f6f78f943445d7d4c5f70d",
+      "records": [
+        {
+          "profile": "baseline-dll-vega-kernels",
+          "stage": "libraries_loaded"
+        },
+        {
+          "profile": "baseline-dll-vega-kernels",
+          "stage": "device",
+          "torch": "2.2.1+cu118",
+          "device": "AMD Radeon RX 580 2048SP [ZLUDA]",
+          "free_vram": 8455716864,
+          "total_vram": 8589934592
+        }
+      ]
+    },
+    {
+      "profile": "optic-dll-baseline-kernels",
+      "return_code": 2,
+      "dll_sha256": "f9aa06ea46d7b84c8fbc8682c15f8972b31b322ed8f020a355af60811ed52f4b",
+      "records": [
+        {
+          "profile": "optic-dll-baseline-kernels",
+          "stage": "libraries_loaded"
+        },
+        {
+          "profile": "optic-dll-baseline-kernels",
+          "stage": "device",
+          "torch": "2.2.1+cu118",
+          "device": "AMD Radeon RX 580 2048SP [ZLUDA]",
+          "free_vram": 8455716864,
+          "total_vram": 8589934592
+        },
+        {
+          "profile": "optic-dll-baseline-kernels",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            127,
+            65,
+            96
+          ],
+          "max_abs_error": 2.829238176345825,
+          "rms_error": 0.8109339475631714,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "profile": "vega-dll-baseline-kernels",
+      "return_code": 2,
+      "dll_sha256": "d12cb6b308763a5cc3e8299bbc5bdab3d2bf90c4ac0839e335bee09fba783cef",
+      "records": [
+        {
+          "profile": "vega-dll-baseline-kernels",
+          "stage": "libraries_loaded"
+        },
+        {
+          "profile": "vega-dll-baseline-kernels",
+          "stage": "device",
+          "torch": "2.2.1+cu118",
+          "device": "AMD Radeon RX 580 2048SP [ZLUDA]",
+          "free_vram": 8455716864,
+          "total_vram": 8589934592
+        },
+        {
+          "profile": "vega-dll-baseline-kernels",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            127,
+            65,
+            96
+          ],
+          "max_abs_error": 2.829238176345825,
+          "rms_error": 0.8109339475631714,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "FAIL"
+        }
+      ]
+    }
+  ],
+  "numeric_reverse_repeat": [
+    {
+      "profile": "optic-full",
+      "return_code": 3221225477,
+      "dll_sha256": "f9aa06ea46d7b84c8fbc8682c15f8972b31b322ed8f020a355af60811ed52f4b",
+      "records": [
+        {
+          "profile": "optic-full",
+          "stage": "libraries_loaded"
+        },
+        {
+          "profile": "optic-full",
+          "stage": "device",
+          "torch": "2.2.1+cu118",
+          "device": "AMD Radeon RX 580 2048SP [ZLUDA]",
+          "free_vram": 8455716864,
+          "total_vram": 8589934592
+        },
+        {
+          "profile": "optic-full",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            127,
+            65,
+            96
+          ],
+          "max_abs_error": 7.152557373046875e-07,
+          "rms_error": 4.704104838992862e-08,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "optic-full",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            127,
+            65,
+            96
+          ],
+          "median_ms": 0.13679999974556267,
+          "samples_ms": [
+            0.14171999937389046,
+            0.14002000098116696,
+            0.13679999974556267,
+            0.13675999944098294,
+            0.13340000004973263,
+            0.13753999955952168,
+            0.13555999903474003
+          ]
+        },
+        {
+          "profile": "optic-full",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            2560,
+            21,
+            2560
+          ],
+          "max_abs_error": 2.86102294921875e-05,
+          "rms_error": 3.934553205908742e-06,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "optic-full",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            2560,
+            21,
+            2560
+          ],
+          "median_ms": 2.107999997679144,
+          "samples_ms": [
+            2.1087199973408133,
+            2.1082599996589124,
+            2.107999997679144,
+            2.1065799985080957,
+            2.108459998271428,
+            2.1068000001832843,
+            2.1049999981187284
+          ]
+        },
+        {
+          "profile": "optic-full",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            9728,
+            21,
+            2560
+          ],
+          "max_abs_error": 8.58306884765625e-06,
+          "rms_error": 1.7302739934166311e-06,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "optic-full",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            9728,
+            21,
+            2560
+          ],
+          "median_ms": 2.078380002058111,
+          "samples_ms": [
+            2.078120000078343,
+            2.0788000023458153,
+            2.0799799996893853,
+            2.077360000112094,
+            2.079559999401681,
+            2.078240000992082,
+            2.078380002058111
+          ]
+        },
+        {
+          "profile": "optic-full",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            512,
+            512,
+            512
+          ],
+          "max_abs_error": 5.7220458984375e-06,
+          "rms_error": 6.705567443532345e-07,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "optic-full",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            512,
+            512,
+            512
+          ],
+          "median_ms": 0.3776800003834069,
+          "samples_ms": [
+            0.39169999945443124,
+            0.3812399983871728,
+            0.37905999924987555,
+            0.3776800003834069,
+            0.3690199984703213,
+            0.3771999996388331,
+            0.3771399991819635
+          ]
+        }
+      ]
+    },
+    {
+      "profile": "baseline",
+      "return_code": 0,
+      "dll_sha256": "9e88918e65b81eeb128c69cd7a96ab495b101daf51f6f78f943445d7d4c5f70d",
+      "records": [
+        {
+          "profile": "baseline",
+          "stage": "libraries_loaded"
+        },
+        {
+          "profile": "baseline",
+          "stage": "device",
+          "torch": "2.2.1+cu118",
+          "device": "AMD Radeon RX 580 2048SP [ZLUDA]",
+          "free_vram": 8455716864,
+          "total_vram": 8589934592
+        },
+        {
+          "profile": "baseline",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            127,
+            65,
+            96
+          ],
+          "max_abs_error": 7.152557373046875e-07,
+          "rms_error": 1.11652397549733e-07,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "baseline",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            127,
+            65,
+            96
+          ],
+          "median_ms": 0.14568000042345375,
+          "samples_ms": [
+            0.1484999986132607,
+            0.14959999825805426,
+            0.1449999981559813,
+            0.14811999863013625,
+            0.1410199998645112,
+            0.14568000042345375,
+            0.14390000142157078
+          ]
+        },
+        {
+          "profile": "baseline",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            2560,
+            21,
+            2560
+          ],
+          "max_abs_error": 3.147125244140625e-05,
+          "rms_error": 3.955676675104769e-06,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "baseline",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            2560,
+            21,
+            2560
+          ],
+          "median_ms": 0.9126400022068992,
+          "samples_ms": [
+            0.9164799994323403,
+            0.9031599998706952,
+            0.9153799997875467,
+            0.9105200006160885,
+            0.8938799990573898,
+            0.9148399985861033,
+            0.9126400022068992
+          ]
+        },
+        {
+          "profile": "baseline",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            9728,
+            21,
+            2560
+          ],
+          "max_abs_error": 3.719329833984375e-05,
+          "rms_error": 3.972884314862313e-06,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "baseline",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            9728,
+            21,
+            2560
+          ],
+          "median_ms": 2.073180000297725,
+          "samples_ms": [
+            2.0835000002989545,
+            2.070219998131506,
+            2.073180000297725,
+            2.0873200002824888,
+            2.0649600017350167,
+            2.0792399998754263,
+            2.0660400012275204
+          ]
+        },
+        {
+          "profile": "baseline",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            512,
+            512,
+            512
+          ],
+          "max_abs_error": 8.106231689453125e-06,
+          "rms_error": 8.304381253765314e-07,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "baseline",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            512,
+            512,
+            512
+          ],
+          "median_ms": 0.23976000084076077,
+          "samples_ms": [
+            0.2565400005551055,
+            0.25388000067323446,
+            0.2325400011613965,
+            0.2439800009597093,
+            0.23976000084076077,
+            0.23252000100910664,
+            0.2322000014828518
+          ]
+        },
+        {
+          "profile": "baseline",
+          "stage": "numeric",
+          "dtype": "torch.float16",
+          "shape": [
+            127,
+            65,
+            96
+          ],
+          "max_abs_error": 0.0,
+          "rms_error": 0.0,
+          "atol": 0.0625,
+          "rtol": 0.02,
+          "status": "PASS"
+        },
+        {
+          "profile": "baseline",
+          "stage": "timing",
+          "dtype": "torch.float16",
+          "shape": [
+            127,
+            65,
+            96
+          ],
+          "median_ms": 0.17726000223774463,
+          "samples_ms": [
+            0.18829999899026006,
+            0.18906000186689198,
+            0.18050000071525574,
+            0.17726000223774463,
+            0.17478000081609935,
+            0.17590000061318278,
+            0.17482000112067908
+          ]
+        },
+        {
+          "profile": "baseline",
+          "stage": "numeric",
+          "dtype": "torch.float16",
+          "shape": [
+            2560,
+            21,
+            2560
+          ],
+          "max_abs_error": 0.0078125,
+          "rms_error": 9.523777407594025e-05,
+          "atol": 0.0625,
+          "rtol": 0.02,
+          "status": "PASS"
+        },
+        {
+          "profile": "baseline",
+          "stage": "timing",
+          "dtype": "torch.float16",
+          "shape": [
+            2560,
+            21,
+            2560
+          ],
+          "median_ms": 0.9736599982716143,
+          "samples_ms": [
+            0.9778999985428527,
+            0.9777600003872067,
+            0.9723199997097254,
+            0.9727800003020093,
+            0.9726999996928498,
+            0.9736599982716143,
+            0.9755999984918162
+          ]
+        },
+        {
+          "profile": "baseline",
+          "stage": "numeric",
+          "dtype": "torch.float16",
+          "shape": [
+            9728,
+            21,
+            2560
+          ],
+          "max_abs_error": 0.0078125,
+          "rms_error": 9.27204528125003e-05,
+          "atol": 0.0625,
+          "rtol": 0.02,
+          "status": "PASS"
+        },
+        {
+          "profile": "baseline",
+          "stage": "timing",
+          "dtype": "torch.float16",
+          "shape": [
+            9728,
+            21,
+            2560
+          ],
+          "median_ms": 2.3177399998530746,
+          "samples_ms": [
+            2.3223600001074374,
+            2.311760000884533,
+            2.3120800004107878,
+            2.32704000081867,
+            2.3177399998530746,
+            2.316039998549968,
+            2.3328399984166026
+          ]
+        },
+        {
+          "profile": "baseline",
+          "stage": "numeric",
+          "dtype": "torch.float16",
+          "shape": [
+            512,
+            512,
+            512
+          ],
+          "max_abs_error": 0.001953125,
+          "rms_error": 2.5294521037722006e-05,
+          "atol": 0.0625,
+          "rtol": 0.02,
+          "status": "PASS"
+        },
+        {
+          "profile": "baseline",
+          "stage": "timing",
+          "dtype": "torch.float16",
+          "shape": [
+            512,
+            512,
+            512
+          ],
+          "median_ms": 0.3015000023879111,
+          "samples_ms": [
+            0.3267199994297698,
+            0.3250400011893362,
+            0.3015000023879111,
+            0.2959800011012703,
+            0.299579999409616,
+            0.29565999866463244,
+            0.30260000203270465
+          ]
+        },
+        {
+          "profile": "baseline",
+          "stage": "complete",
+          "status": "PASS"
+        }
+      ]
+    }
+  ],
+  "diffusion_shape_fp32": [
+    {
+      "profile": "baseline",
+      "return_code": 0,
+      "dll_sha256": "9e88918e65b81eeb128c69cd7a96ab495b101daf51f6f78f943445d7d4c5f70d",
+      "records": [
+        {
+          "profile": "baseline",
+          "stage": "libraries_loaded"
+        },
+        {
+          "profile": "baseline",
+          "stage": "device",
+          "torch": "2.2.1+cu118",
+          "device": "AMD Radeon RX 580 2048SP [ZLUDA]",
+          "free_vram": 8455716864,
+          "total_vram": 8589934592
+        },
+        {
+          "profile": "baseline",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            320,
+            4096,
+            320
+          ],
+          "max_abs_error": 6.198883056640625e-06,
+          "rms_error": 5.390610340327839e-07,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "baseline",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            320,
+            4096,
+            320
+          ],
+          "median_ms": 0.37028000224381685,
+          "samples_ms": [
+            0.3784200001973659,
+            0.3716999985044822,
+            0.37400000146590173,
+            0.37025999918114394,
+            0.36967999767512083,
+            0.3702199988765642,
+            0.37028000224381685
+          ]
+        },
+        {
+          "profile": "baseline",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            1280,
+            1024,
+            1280
+          ],
+          "max_abs_error": 2.09808349609375e-05,
+          "rms_error": 2.0304244117141934e-06,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "baseline",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            1280,
+            1024,
+            1280
+          ],
+          "median_ms": 1.0406599991256371,
+          "samples_ms": [
+            1.0417800018331036,
+            1.0394599987193942,
+            1.0402599989902228,
+            1.0538200003793463,
+            1.0407199995825067,
+            1.0403199994470924,
+            1.0406599991256371
+          ]
+        },
+        {
+          "profile": "baseline",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            320,
+            4096,
+            2880
+          ],
+          "max_abs_error": 4.57763671875e-05,
+          "rms_error": 4.451663244253723e-06,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "baseline",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            320,
+            4096,
+            2880
+          ],
+          "median_ms": 2.072619998943992,
+          "samples_ms": [
+            2.077939998707734,
+            2.0733200013637543,
+            2.072460000636056,
+            2.0725600013975054,
+            2.072040000348352,
+            2.072919998317957,
+            2.072619998943992
+          ]
+        },
+        {
+          "profile": "baseline",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            768,
+            77,
+            768
+          ],
+          "max_abs_error": 9.5367431640625e-06,
+          "rms_error": 1.213142695632996e-06,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "baseline",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            768,
+            77,
+            768
+          ],
+          "median_ms": 0.28307999891694635,
+          "samples_ms": [
+            0.2866599999833852,
+            0.2854599995771423,
+            0.28556000033859164,
+            0.2829399978509173,
+            0.28307999891694635,
+            0.28221999818924814,
+            0.2827799995429814
+          ]
+        },
+        {
+          "profile": "baseline",
+          "stage": "complete",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "profile": "optic-full",
+      "return_code": 0,
+      "dll_sha256": "f9aa06ea46d7b84c8fbc8682c15f8972b31b322ed8f020a355af60811ed52f4b",
+      "records": [
+        {
+          "profile": "optic-full",
+          "stage": "libraries_loaded"
+        },
+        {
+          "profile": "optic-full",
+          "stage": "device",
+          "torch": "2.2.1+cu118",
+          "device": "AMD Radeon RX 580 2048SP [ZLUDA]",
+          "free_vram": 8455716864,
+          "total_vram": 8589934592
+        },
+        {
+          "profile": "optic-full",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            320,
+            4096,
+            320
+          ],
+          "max_abs_error": 6.198883056640625e-06,
+          "rms_error": 5.228400254964072e-07,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "optic-full",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            320,
+            4096,
+            320
+          ],
+          "median_ms": 0.8149800007231534,
+          "samples_ms": [
+            0.8189600019250065,
+            0.8138000004692003,
+            0.8138800010783598,
+            0.8126200002152473,
+            0.8149800007231534,
+            0.8563999988837168,
+            0.8184199978131801
+          ]
+        },
+        {
+          "profile": "optic-full",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            1280,
+            1024,
+            1280
+          ],
+          "max_abs_error": 2.384185791015625e-05,
+          "rms_error": 2.017299948420259e-06,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "optic-full",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            1280,
+            1024,
+            1280
+          ],
+          "median_ms": 3.0704400007380173,
+          "samples_ms": [
+            3.080240002600476,
+            3.081560001010075,
+            3.0704400007380173,
+            3.067039998131804,
+            3.068119997624308,
+            3.0781199980992824,
+            3.0687599995872006
+          ]
+        },
+        {
+          "profile": "optic-full",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            320,
+            4096,
+            2880
+          ],
+          "max_abs_error": 6.103515625e-05,
+          "rms_error": 4.4388921196514275e-06,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "optic-full",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            320,
+            4096,
+            2880
+          ],
+          "median_ms": 6.180419999873266,
+          "samples_ms": [
+            6.171419998281635,
+            6.185900000855327,
+            6.17795999860391,
+            6.180419999873266,
+            6.185420000110753,
+            6.224680002196692,
+            6.175739999162033
+          ]
+        },
+        {
+          "profile": "optic-full",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            768,
+            77,
+            768
+          ],
+          "max_abs_error": 1.0013580322265625e-05,
+          "rms_error": 1.1971541198363411e-06,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "optic-full",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            768,
+            77,
+            768
+          ],
+          "median_ms": 0.2936400007456541,
+          "samples_ms": [
+            0.30611999973189086,
+            0.292319999425672,
+            0.3016400005435571,
+            0.331880000885576,
+            0.2936400007456541,
+            0.2873599994927645,
+            0.28998000198043883
+          ]
+        },
+        {
+          "profile": "optic-full",
+          "stage": "complete",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "profile": "optic-full",
+      "return_code": 0,
+      "dll_sha256": "f9aa06ea46d7b84c8fbc8682c15f8972b31b322ed8f020a355af60811ed52f4b",
+      "records": [
+        {
+          "profile": "optic-full",
+          "stage": "libraries_loaded"
+        },
+        {
+          "profile": "optic-full",
+          "stage": "device",
+          "torch": "2.2.1+cu118",
+          "device": "AMD Radeon RX 580 2048SP [ZLUDA]",
+          "free_vram": 8455716864,
+          "total_vram": 8589934592
+        },
+        {
+          "profile": "optic-full",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            320,
+            4096,
+            320
+          ],
+          "max_abs_error": 6.198883056640625e-06,
+          "rms_error": 5.228400254964072e-07,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "optic-full",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            320,
+            4096,
+            320
+          ],
+          "median_ms": 0.8069400006206706,
+          "samples_ms": [
+            0.806880000163801,
+            0.8084000000962988,
+            0.8081799984211102,
+            0.8054799982346594,
+            0.8069400006206706,
+            0.805839998065494,
+            0.8105399989290163
+          ]
+        },
+        {
+          "profile": "optic-full",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            1280,
+            1024,
+            1280
+          ],
+          "max_abs_error": 2.384185791015625e-05,
+          "rms_error": 2.017299948420259e-06,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "optic-full",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            1280,
+            1024,
+            1280
+          ],
+          "median_ms": 3.066300001228228,
+          "samples_ms": [
+            3.0676199996378273,
+            3.0695399997057393,
+            3.06482000160031,
+            3.06605999940075,
+            3.0674399982672185,
+            3.0135400011204183,
+            3.066300001228228
+          ]
+        },
+        {
+          "profile": "optic-full",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            320,
+            4096,
+            2880
+          ],
+          "max_abs_error": 6.103515625e-05,
+          "rms_error": 4.4388921196514275e-06,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "optic-full",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            320,
+            4096,
+            2880
+          ],
+          "median_ms": 6.1647399998037145,
+          "samples_ms": [
+            6.1631000018678606,
+            6.1647399998037145,
+            6.178119999822229,
+            6.157719998736866,
+            6.159599998500198,
+            6.174259999534115,
+            6.1737800016999245
+          ]
+        },
+        {
+          "profile": "optic-full",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            768,
+            77,
+            768
+          ],
+          "max_abs_error": 1.0013580322265625e-05,
+          "rms_error": 1.1971541198363411e-06,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "optic-full",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            768,
+            77,
+            768
+          ],
+          "median_ms": 0.2744199999142438,
+          "samples_ms": [
+            0.274100000387989,
+            0.27365999994799495,
+            0.2753600012511015,
+            0.2739200019277632,
+            0.2744199999142438,
+            0.2754399989498779,
+            0.2777600020635873
+          ]
+        },
+        {
+          "profile": "optic-full",
+          "stage": "complete",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "profile": "baseline",
+      "return_code": 0,
+      "dll_sha256": "9e88918e65b81eeb128c69cd7a96ab495b101daf51f6f78f943445d7d4c5f70d",
+      "records": [
+        {
+          "profile": "baseline",
+          "stage": "libraries_loaded"
+        },
+        {
+          "profile": "baseline",
+          "stage": "device",
+          "torch": "2.2.1+cu118",
+          "device": "AMD Radeon RX 580 2048SP [ZLUDA]",
+          "free_vram": 8455716864,
+          "total_vram": 8589934592
+        },
+        {
+          "profile": "baseline",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            320,
+            4096,
+            320
+          ],
+          "max_abs_error": 6.198883056640625e-06,
+          "rms_error": 5.390610340327839e-07,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "baseline",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            320,
+            4096,
+            320
+          ],
+          "median_ms": 0.3727400006027892,
+          "samples_ms": [
+            0.37367999902926385,
+            0.3734800004167482,
+            0.3712999983690679,
+            0.3717799991136417,
+            0.37096000160090625,
+            0.37665999843738973,
+            0.3727400006027892
+          ]
+        },
+        {
+          "profile": "baseline",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            1280,
+            1024,
+            1280
+          ],
+          "max_abs_error": 2.09808349609375e-05,
+          "rms_error": 2.0304244117141934e-06,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "baseline",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            1280,
+            1024,
+            1280
+          ],
+          "median_ms": 1.0392600001068786,
+          "samples_ms": [
+            1.0409399983473122,
+            1.0388000024249777,
+            1.0392600001068786,
+            1.0411600000225008,
+            1.0404999979073182,
+            1.0373400000389665,
+            1.03845999983605
+          ]
+        },
+        {
+          "profile": "baseline",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            320,
+            4096,
+            2880
+          ],
+          "max_abs_error": 4.57763671875e-05,
+          "rms_error": 4.451663244253723e-06,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "baseline",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            320,
+            4096,
+            2880
+          ],
+          "median_ms": 2.068000001600012,
+          "samples_ms": [
+            2.068000001600012,
+            2.066859998740256,
+            2.0651199971325696,
+            2.069040000787936,
+            2.069080001092516,
+            2.068640000652522,
+            2.065940000466071
+          ]
+        },
+        {
+          "profile": "baseline",
+          "stage": "numeric",
+          "dtype": "torch.float32",
+          "shape": [
+            768,
+            77,
+            768
+          ],
+          "max_abs_error": 9.5367431640625e-06,
+          "rms_error": 1.213142695632996e-06,
+          "atol": 5e-05,
+          "rtol": 0.0002,
+          "status": "PASS"
+        },
+        {
+          "profile": "baseline",
+          "stage": "timing",
+          "dtype": "torch.float32",
+          "shape": [
+            768,
+            77,
+            768
+          ],
+          "median_ms": 0.28467999945860356,
+          "samples_ms": [
+            0.28412000101525337,
+            0.2892799995606765,
+            0.28642000106628984,
+            0.28469999961089343,
+            0.28341999859549105,
+            0.28467999945860356,
+            0.28460000175982714
+          ]
+        },
+        {
+          "profile": "baseline",
+          "stage": "complete",
+          "status": "PASS"
+        }
+      ]
+    }
+  ],
+  "application_fixture": {
+    "application": "KoboldCPP (benchmark fixture only; not installed or distributed by toolkit)",
+    "controlled_version": "1.95.1 oldpc",
+    "model": "Qwen3-4B-Instruct-2507-heretic-uncens.i1-IQ4_XS.gguf",
+    "model_sha256": "78614724ef8ccb9d50831fb24b3be3b6a90a4b7c5d73230531fdb80e4386a98d",
+    "sampling": {
+      "temperature": 0,
+      "top_k": 1,
+      "top_p": 1,
+      "rep_pen": 1,
+      "sampler_seed": 580,
+      "max_length": 128,
+      "contextsize": 1024
+    },
+    "controls": [
+      "2+2 = 4",
+      "7*9 = 63",
+      "capital of France = Paris"
+    ],
+    "native_dll_sha256": {
+      "koboldcpp_cublas.dll": "3e089065368bb5710887656309456f3eacf971423ebb92da6d31d827d7e2946a",
+      "koboldcpp_vulkan_noavx2.dll": "a70a5c9566f168a8047953753d8f1a0fb21a511dcd3a7e7c2f60ebfcb90f14d2"
+    },
+    "results": [
+      {
+        "name": "baseline-no-batch",
+        "profile": "baseline",
+        "gpu_layers": 24,
+        "blas_batch": -1,
+        "threads": 8,
+        "context": 1024,
+        "controls_pass": true,
+        "offload": [
+          [
+            "24",
+            "37"
+          ]
+        ],
+        "controls": [
+          {
+            "expected": "4",
+            "answer": "4",
+            "pass": true
+          },
+          {
+            "expected": "63",
+            "answer": "63",
+            "pass": true
+          },
+          {
+            "expected": "Paris",
+            "answer": "Paris",
+            "pass": true
+          }
+        ],
+        "samples": [
+          {
+            "trial": 0,
+            "wall_seconds": 20.190798900002846,
+            "output_sha256": "deec2f49ae522e726d5bd47f165e0e130b9a06f64485da650c487cf6d82aee0f",
+            "generated_tokens": 128,
+            "input_tokens": 59,
+            "decode_tps": 8.249548852797112,
+            "reported_prefill_tps": 8.441558316096145,
+            "decode_seconds": 15.516
+          },
+          {
+            "trial": 1,
+            "wall_seconds": 20.533627600001637,
+            "output_sha256": "5d7e2d7353a00058bcf3549f83c8b10cb9a4334016ce78a46c24573421e8e750",
+            "generated_tokens": 128,
+            "input_tokens": 59,
+            "decode_tps": 8.03919105639995,
+            "reported_prefill_tps": 8.55450740997525,
+            "decode_seconds": 15.922
+          },
+          {
+            "trial": 2,
+            "wall_seconds": 19.68563969999377,
+            "output_sha256": "b9b7ae825dc3c2452f8c46d2bb1ff068d0ae2ea2f3ac8d246eb3e52791f58498",
+            "generated_tokens": 128,
+            "input_tokens": 59,
+            "decode_tps": 8.519134775374376,
+            "reported_prefill_tps": 8.46537882751093,
+            "decode_seconds": 15.025
+          }
+        ],
+        "summary": {
+          "wall_seconds": 20.190798900002846,
+          "decode_tps": 8.249548852797112,
+          "reported_prefill_tps": 8.46537882751093
+        }
+      },
+      {
+        "name": "optic-no-batch",
+        "profile": "optic",
+        "gpu_layers": 24,
+        "blas_batch": -1,
+        "threads": 8,
+        "context": 1024,
+        "controls_pass": true,
+        "offload": [
+          [
+            "24",
+            "37"
+          ]
+        ],
+        "controls": [
+          {
+            "expected": "4",
+            "answer": "4",
+            "pass": true
+          },
+          {
+            "expected": "63",
+            "answer": "63",
+            "pass": true
+          },
+          {
+            "expected": "Paris",
+            "answer": "Paris",
+            "pass": true
+          }
+        ],
+        "samples": [
+          {
+            "trial": 0,
+            "wall_seconds": 20.570251299999654,
+            "output_sha256": "deec2f49ae522e726d5bd47f165e0e130b9a06f64485da650c487cf6d82aee0f",
+            "generated_tokens": 128,
+            "input_tokens": 59,
+            "decode_tps": 8.0660407082992,
+            "reported_prefill_tps": 8.39612501714335,
+            "decode_seconds": 15.869
+          },
+          {
+            "trial": 1,
+            "wall_seconds": 20.292178299991065,
+            "output_sha256": "5d7e2d7353a00058bcf3549f83c8b10cb9a4334016ce78a46c24573421e8e750",
+            "generated_tokens": 128,
+            "input_tokens": 59,
+            "decode_tps": 8.102804329936063,
+            "reported_prefill_tps": 8.799638701357763,
+            "decode_seconds": 15.797
+          },
+          {
+            "trial": 2,
+            "wall_seconds": 20.41839420000906,
+            "output_sha256": "b9b7ae825dc3c2452f8c46d2bb1ff068d0ae2ea2f3ac8d246eb3e52791f58498",
+            "generated_tokens": 128,
+            "input_tokens": 59,
+            "decode_tps": 8.137317228226319,
+            "reported_prefill_tps": 8.397933064875238,
+            "decode_seconds": 15.73
+          }
+        ],
+        "summary": {
+          "wall_seconds": 20.41839420000906,
+          "decode_tps": 8.102804329936063,
+          "reported_prefill_tps": 8.397933064875238
+        }
+      },
+      {
+        "name": "optic-batch512",
+        "profile": "optic",
+        "gpu_layers": 24,
+        "blas_batch": 512,
+        "threads": 8,
+        "context": 1024,
+        "offload": [
+          [
+            "24",
+            "37"
+          ]
+        ],
+        "failure": "Native worker exited with 0xc0000005 before controls",
+        "controls": [],
+        "samples": []
+      },
+      {
+        "name": "vulkan-no-batch",
+        "profile": "vulkan",
+        "gpu_layers": 24,
+        "blas_batch": -1,
+        "threads": 8,
+        "context": 1024,
+        "controls_pass": true,
+        "offload": [
+          [
+            "24",
+            "37"
+          ]
+        ],
+        "controls": [
+          {
+            "expected": "4",
+            "answer": "4",
+            "pass": true
+          },
+          {
+            "expected": "63",
+            "answer": "63",
+            "pass": true
+          },
+          {
+            "expected": "Paris",
+            "answer": "Paris",
+            "pass": true
+          }
+        ],
+        "samples": [
+          {
+            "trial": 0,
+            "wall_seconds": 17.390388300002087,
+            "output_sha256": "307821b84741f8fe77e97e6c7c1d1772697daed33d1b4c918b8bad2fe84f834e",
+            "generated_tokens": 128,
+            "input_tokens": 59,
+            "decode_tps": 9.567232229613573,
+            "reported_prefill_tps": 9.868420804966856,
+            "decode_seconds": 13.379
+          },
+          {
+            "trial": 1,
+            "wall_seconds": 17.42392969998764,
+            "output_sha256": "fc859ef5448c4ebd6ea22ef178b3ce0086fbd188765e6d339f797d0cf6372aee",
+            "generated_tokens": 128,
+            "input_tokens": 59,
+            "decode_tps": 9.603841536614647,
+            "reported_prefill_tps": 9.660639380549236,
+            "decode_seconds": 13.328
+          },
+          {
+            "trial": 2,
+            "wall_seconds": 17.437395300003118,
+            "output_sha256": "cb1bc24ab599df006639339c306a56ee135ae7937b3ec4bb9731e22e7ffd115d",
+            "generated_tokens": 128,
+            "input_tokens": 59,
+            "decode_tps": 9.57868742048941,
+            "reported_prefill_tps": 9.713574355547117,
+            "decode_seconds": 13.363
+          }
+        ],
+        "summary": {
+          "wall_seconds": 17.42392969998764,
+          "decode_tps": 9.57868742048941,
+          "reported_prefill_tps": 9.713574355547117
+        }
+      },
+      {
+        "name": "vulkan-batch512",
+        "profile": "vulkan",
+        "gpu_layers": 24,
+        "blas_batch": 512,
+        "threads": 8,
+        "context": 1024,
+        "controls_pass": true,
+        "offload": [
+          [
+            "24",
+            "37"
+          ]
+        ],
+        "controls": [
+          {
+            "expected": "4",
+            "answer": "4",
+            "pass": true
+          },
+          {
+            "expected": "63",
+            "answer": "63",
+            "pass": true
+          },
+          {
+            "expected": "Paris",
+            "answer": "Paris",
+            "pass": true
+          }
+        ],
+        "samples": [
+          {
+            "trial": 0,
+            "wall_seconds": 14.742604900005972,
+            "output_sha256": "f4c7b179f9942c6fdf4455e80eac94d214ca029316a75263e1f54eacc01295f7",
+            "generated_tokens": 128,
+            "input_tokens": 59,
+            "decode_tps": 9.22589015424535,
+            "reported_prefill_tps": 48.26732627691773,
+            "decode_seconds": 13.874
+          },
+          {
+            "trial": 1,
+            "wall_seconds": 14.667094299991732,
+            "output_sha256": "5db53d7fcf5df19158fbc10bd9171639f55bb8240c2c43ef93a32e2a62c3569d",
+            "generated_tokens": 128,
+            "input_tokens": 59,
+            "decode_tps": 9.279396839205452,
+            "reported_prefill_tps": 47.97048105529788,
+            "decode_seconds": 13.794
+          },
+          {
+            "trial": 2,
+            "wall_seconds": 14.712642900005449,
+            "output_sha256": "1674c3fd93019d39975e9e8b4c0fd2dc5dee9f4a882ed6f352bbe7bba455ca72",
+            "generated_tokens": 128,
+            "input_tokens": 59,
+            "decode_tps": 9.250560092505602,
+            "reported_prefill_tps": 47.79411831735328,
+            "decode_seconds": 13.837
+          }
+        ],
+        "summary": {
+          "wall_seconds": 14.712642900005449,
+          "decode_tps": 9.250560092505602,
+          "reported_prefill_tps": 47.97048105529788
+        }
+      },
+      {
+        "name": "baseline-32layers",
+        "profile": "baseline",
+        "gpu_layers": 32,
+        "blas_batch": -1,
+        "threads": 8,
+        "context": 1024,
+        "controls_pass": true,
+        "offload": [
+          [
+            "32",
+            "37"
+          ]
+        ],
+        "controls": [
+          {
+            "expected": "4",
+            "answer": "4",
+            "pass": true
+          },
+          {
+            "expected": "63",
+            "answer": "63",
+            "pass": true
+          },
+          {
+            "expected": "Paris",
+            "answer": "Paris",
+            "pass": true
+          }
+        ],
+        "samples": [
+          {
+            "trial": 0,
+            "wall_seconds": 19.921036300002015,
+            "output_sha256": "deec2f49ae522e726d5bd47f165e0e130b9a06f64485da650c487cf6d82aee0f",
+            "generated_tokens": 128,
+            "input_tokens": 59,
+            "decode_tps": 8.3545460479081,
+            "reported_prefill_tps": 8.578970552332756,
+            "decode_seconds": 15.321
+          },
+          {
+            "trial": 1,
+            "wall_seconds": 19.995670399992377,
+            "output_sha256": "80abffcf5b689cffb7f981c051b417c1666a39d4b22d55a0db6ade9b996fec4c",
+            "generated_tokens": 128,
+            "input_tokens": 59,
+            "decode_tps": 8.308451252758665,
+            "reported_prefill_tps": 8.597883511115548,
+            "decode_seconds": 15.406
+          }
+        ],
+        "summary": {
+          "wall_seconds": 19.958353349997196,
+          "decode_tps": 8.331498650333383,
+          "reported_prefill_tps": 8.588427031724152
+        }
+      },
+      {
+        "name": "vulkan-32layers",
+        "profile": "vulkan",
+        "gpu_layers": 32,
+        "blas_batch": 512,
+        "threads": 8,
+        "context": 1024,
+        "controls_pass": true,
+        "offload": [
+          [
+            "32",
+            "37"
+          ]
+        ],
+        "controls": [
+          {
+            "expected": "4",
+            "answer": "4",
+            "pass": true
+          },
+          {
+            "expected": "63",
+            "answer": "63",
+            "pass": true
+          },
+          {
+            "expected": "Paris",
+            "answer": "Paris",
+            "pass": true
+          }
+        ],
+        "samples": [
+          {
+            "trial": 0,
+            "wall_seconds": 11.469076599998516,
+            "output_sha256": "4ffae7200fd0d3a73b5590847a3c33fc2223414e7365177ffe73c9160989f75b",
+            "generated_tokens": 128,
+            "input_tokens": 59,
+            "decode_tps": 11.962616822429906,
+            "reported_prefill_tps": 55.00705203819799,
+            "decode_seconds": 10.700000000000001
+          },
+          {
+            "trial": 1,
+            "wall_seconds": 11.411608399997931,
+            "output_sha256": "e83f16aac5077b4c2b23423dc36bf9a11080cd8aaa91c6eb7ece3dbade9831d8",
+            "generated_tokens": 128,
+            "input_tokens": 59,
+            "decode_tps": 12.02442461249413,
+            "reported_prefill_tps": 55.162661504145454,
+            "decode_seconds": 10.645
+          }
+        ],
+        "summary": {
+          "wall_seconds": 11.440342499998224,
+          "decode_tps": 11.993520717462019,
+          "reported_prefill_tps": 55.08485677117172
+        }
+      },
+      {
+        "name": "optimized-vulkan-current",
+        "profile": "vulkan",
+        "gpu_layers": 99,
+        "blas_batch": 1024,
+        "threads": 6,
+        "context": 1024,
+        "blas_threads": 4,
+        "version": "1.123.1 optimized",
+        "batchsize": 1024,
+        "ubatchsize": 1024,
+        "controls_pass": true,
+        "offload": [
+          [
+            "37",
+            "37"
+          ]
+        ],
+        "controls": [
+          {
+            "expected": "4",
+            "answer": "4",
+            "pass": true
+          },
+          {
+            "expected": "63",
+            "answer": "63",
+            "pass": true
+          },
+          {
+            "expected": "Paris",
+            "answer": "Paris",
+            "pass": true
+          }
+        ],
+        "samples": [
+          {
+            "trial": 0,
+            "wall_seconds": 3.934283399998094,
+            "output_sha256": "4ffae7200fd0d3a73b5590847a3c33fc2223414e7365177ffe73c9160989f75b",
+            "generated_tokens": 128,
+            "input_tokens": 59,
+            "decode_tps": 33.049315775884324,
+            "reported_prefill_tps": 6499.99975785614,
+            "decode_seconds": 3.873
+          },
+          {
+            "trial": 1,
+            "wall_seconds": 3.9240064000041457,
+            "output_sha256": "4ffae7200fd0d3a73b5590847a3c33fc2223414e7365177ffe73c9160989f75b",
+            "generated_tokens": 128,
+            "input_tokens": 59,
+            "decode_tps": 33.126293995859214,
+            "reported_prefill_tps": 6499.99975785614,
+            "decode_seconds": 3.864
+          }
+        ],
+        "summary": {
+          "wall_seconds": 3.92914490000112,
+          "decode_tps": 33.08780488587177,
+          "reported_prefill_tps": 6499.99975785614
+        }
+      }
+    ],
+    "source_frontend_sha256": "dbf9857775ddb3cde6dfc134ad73d1d467cb653372c7aa7f19cf129b2849bb16",
+    "optimized_executable_sha256": "651e4a41d3581bf619ae9fe2112a09af1a39110489ae8bd2b32f1f3ff142aee4",
+    "optimized_vulkan_environment": {
+      "GGML_VK_ALLOW_GRAPHICS_QUEUE": "1",
+      "GGML_VK_BATCHED_SUBMITS": "1",
+      "GGML_VK_MAX_NODES_PER_SUBMIT": "100",
+      "GGML_VK_GCN_TILE64": "1",
+      "GGML_VK_GCN_TILE_VARIANT": "k16",
+      "GGML_VK_IQ4_XS_ROWS": "4",
+      "GGML_VK_IQ4_XS_WG": "64"
+    },
+    "synthetic_prompt_template": "<|im_start|>system\nYou are a helpful assistant. Answer directly without thinking aloud.<|im_end|>\n<|im_start|>user\n{trial_letter}: Write a detailed practical guide to caring for a small vegetable garden. Discuss soil, watering, sunlight and harvesting. Continue for at least 200 words.<|im_end|>\n<|im_start|>assistant\n",
+    "trial_letters": [
+      "A",
+      "B",
+      "C"
+    ],
+    "stop_sequences": []
+  },
+  "protection": {
+    "baseline_dll_and_kernels_unchanged": true,
+    "protected_driver_files_unchanged": true,
+    "existing_services_not_stopped": true,
+    "comfyui_generation_run": false
+  },
+  "decision": "Retain the matched advanced-lvl-up DLL/kernel pair. Do not install mixed pairs or promote unstable optic as a faster default."
+}

@@ -158,7 +158,7 @@ if($Backend -eq 'AMD'){
 }
 Copy-Item -LiteralPath (Join-Path $source 'tools') -Destination (Join-Path $root 'tools') -Recurse
 foreach($name in @('Python-CUDA.cmd','Python-ONNX.cmd','Run-ZLUDA.cmd','HIP-Shell.cmd')){Copy-Item -LiteralPath (Join-Path $source $name) -Destination (Join-Path $root $name)}
-@{backend=$Backend;version='0.2.0';comfy_installed=[bool]$WithComfyUI;architecture='Polaris/gfx803';comfy_commit='c0c011dca91b595091a4b032770da366fc90fb2b';models_included=$false} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $root 'profile.json') -Encoding UTF8
+@{backend=$Backend;version='0.2.1';comfy_installed=[bool]$WithComfyUI;architecture='Polaris/gfx803';comfy_commit='c0c011dca91b595091a4b032770da366fc90fb2b';models_included=$false} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $root 'profile.json') -Encoding UTF8
 New-Item -ItemType Directory -Path (Join-Path $root 'models'),(Join-Path $root 'temp') -Force | Out-Null
 if($WithComfyUI){
     Copy-Item -LiteralPath (Join-Path $source 'Start-ComfyUI.cmd') -Destination $root
