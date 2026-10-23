@@ -1,0 +1,5 @@
+case,output_tokens,prefill_tokens_per_second,decode_tokens_per_second,decode_seconds,total_seconds
+short_control_1,2,8.44,16.39,0.12,4.03
+short_control_2,3,8.48,12.5,0.24,2.01
+short_control_3,2,8.53,16.26,0.12,2.12
+128_token_description,128,8.77,8.46,15.13,17.07

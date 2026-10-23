@@ -1,0 +1,5 @@
+case,cpu_total_seconds,gpu_total_seconds,relative_request_throughput_percent,latency_reduction_percent,outputs_identical,runs
+arithmetic,5.734,5.266,8.89,8.16,True,1
+translation,7.875,5.109,54.14,35.12,True,1
+long context,53.125,50.61,4.97,4.73,True,1
+long output,11.563,11.343,1.94,1.9,True,1
