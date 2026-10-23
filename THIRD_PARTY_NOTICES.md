@@ -53,3 +53,17 @@ host paths, serial/device identifiers, user profiles, credentials, and caches
 remain outside this repository and its release. The installer has no sign-in,
 stored credential, telemetry-upload or API-key configuration feature. Normal
 publisher downloads and local application interfaces are distinct from an API key.
+
+## Optional source contribution and PyTorch DirectML
+
+The small-GEMM source contribution and portable adaptations are GPL-3.0-only;
+see patches/small-gemm/NOTICE.txt. It is inspired by the linked Schaka finding,
+not a redistribution of a Linux ROCm binary or a claim of a complete port.
+Builds keep the separately acquired original rocBLAS binary unchanged; neither
+that backend nor generated shim/hsaco/import-library artifacts are published here.
+
+Optional torch-directml is downloaded from its publisher's pinned PyPI wheel.
+See [Microsoft DirectML](https://github.com/microsoft/DirectML/tree/master/PyTorch)
+and the upstream package's license/component notices. Python 3.11.9, Torch CPU
+2.4.1 and torchvision CPU 0.19.1 retain their upstream notices. The source-only
+project archive does not mirror those wheels, AMD runtime DLLs or model weights.

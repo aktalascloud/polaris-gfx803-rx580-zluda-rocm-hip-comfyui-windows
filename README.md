@@ -29,6 +29,20 @@ Default destination: `runtime` next to Install.cmd. Use launchers inside that in
 
 Models are not included or downloaded automatically. Obtain appropriately licensed checkpoints from [Hugging Face](https://huggingface.co/models), following the selected application's format and model-folder instructions. This toolkit does not require a specific language-model application.
 
+## Optional source contribution: small GEMM, Torch DirectML and diagnostics
+
+The contribution branch adds **`-WithSmallGemmPatch`** and **`-WithTorchDirectML`**,
+both opt-in, plus a model-free **Check-Zluda.cmd** and read-only DLL diagnostics.
+The native fix handles tiny FP32 GEMMs (dimensions 1–8) on tested Polaris device 0;
+other operations retain the matched original backend. It is not a complete ROCm
+port or a performance promise. Torch DirectML gets its own Python 3.11/Torch 2.4.1
+CPU-core environment; existing CUDA Torch and ONNX environments remain separate.
+
+[Installation, rebuild, rollback, limits and verified results](docs/SMALL-GEMM.md).
+The all-options installer was rerun in a fresh directory with an existing SDK;
+models/generation and ComfyUI startup were not used. Historic v0.2.1 limitations
+below describe that earlier release, before this optional correction existed.
+
 ## Patches are applied automatically
 
 The **installed toolkit** already has the required gfx803 overrides: advanced-lvl-up rocBLAS DLL **and its matching kernel blobs**, pinned ZLUDA 3.9.5, Torch DLL aliases, preserved original NVRTC and process-local loading. No manual blob copying is needed after successful setup.
@@ -51,13 +65,13 @@ The repository includes the ComfyUI source patch, complete install logic, pinned
 - Same oldpc application build / 24 GPU layers: Vulkan **9.58 tokens/s** without BLAS batching; **9.25 tokens/s** with batch 512 and substantially faster prompt processing. ZLUDA batching 512 with optic crashed before controls.
 - The separate optimized Vulkan configuration reached **33.09 tokens/s** versus ZLUDA **8.25 tokens/s**. This also changes version, offload count, CPU threads and custom kernels; its roughly **4.01x** ratio is a configuration comparison, not a rocBLAS patch gain. Samples were two 128-token requests for optimized Vulkan, three for the 24-layer reference.
 
-**Default remains the matched advanced-lvl-up pair.** No unstable blob package or mixed set is promoted. Existing working files and protected driver files were unchanged. The source-only installer and optional ComfyUI generation have not received fresh end-to-end validation. GPU workload scripts are manual only; Install.cmd never runs them.
+**Default remains the matched advanced-lvl-up pair.** No unstable blob package or mixed set is promoted. Existing working files and protected driver files were unchanged. At v0.2.1 publication, the installer and ComfyUI generation had no fresh end-to-end validation; the separate contribution validation above now covers the installer with an existing SDK. GPU workload scripts are manual only; Install.cmd never runs them.
 
 ## Historical verification and limits
 
 Recorded on 2026-10-22: RX580 2048SP, Polaris/gfx803, 8 GiB, Windows 11, existing AMD driver 31.0.14037.18001. PyTorch FP32/FP16 GEMM, a small convolutional network, 60 BMM/copy iterations and LayerNorm/Softmax passed earlier. Tiny batched GEMM still has unsupported shapes. Physical Radeon DirectML passed with CPU fallback disabled; OpenVINO CPU passed.
 
-ComfyUI commit `c0c011dca91b595091a4b032770da366fc90fb2b` was installed previously but **not launched or validated by image generation**; this legacy snapshot does not provide Z-Image support. Fresh isolated GEMM and application tests were explicitly authorized on 2026-10-23; see the linked retry report. The revised installer has only static checks, not a fresh end-to-end install. Downloaded Python 3.12.10 differs from the original host's 3.12.14, sharing cp312 ABI.
+ComfyUI commit `c0c011dca91b595091a4b032770da366fc90fb2b` was installed previously but **not launched or validated by image generation**; this legacy snapshot does not provide Z-Image support. Fresh isolated GEMM and application tests were explicitly authorized on 2026-10-23; see the linked retry report. The v0.2.1 installer had only static checks. The optional contribution now has the separate fresh-install validation described above. Downloaded Python 3.12.10 differs from the original host's 3.12.14, sharing cp312 ABI.
 
 No universal tokens/s, images/s or per-patch percentage is claimed. Application-specific launchers and model downloaders are not part of this general toolkit. The documented language-model application is a measurement fixture only.
 

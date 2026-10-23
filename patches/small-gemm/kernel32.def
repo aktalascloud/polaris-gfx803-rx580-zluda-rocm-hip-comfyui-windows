@@ -1,0 +1,8 @@
+LIBRARY KERNEL32.dll
+EXPORTS
+GetProcAddress=KERNELBASE.GetProcAddress
+GetModuleHandleA=KERNELBASE.GetModuleHandleA
+GetModuleHandleExA=KERNELBASE.GetModuleHandleExA
+GetModuleFileNameA=KERNELBASE.GetModuleFileNameA
+InitOnceExecuteOnce=KERNELBASE.InitOnceExecuteOnce
+LoadLibraryExA=KERNELBASE.LoadLibraryExA

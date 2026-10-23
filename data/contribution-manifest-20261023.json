@@ -1,0 +1,54 @@
+{
+  "COPYING": {
+    "bytes": 35149,
+    "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+  },
+  "historical-results.json": {
+    "bytes": 1209,
+    "sha256": "e8f5b0b6fbf85e48b311cd2df019e4a5b3bc4a40d10185dac5cc02655abf4c53"
+  },
+  "INSTRUCTIONS-RU.txt": {
+    "bytes": 19728,
+    "sha256": "5c4f995796fa0359fb61b0e8acbfb3c13a3ef72c17ba7e9423b8b44d04e9e2e2"
+  },
+  "NOTICE.txt": {
+    "bytes": 980,
+    "sha256": "129a771f9f03cd7712d6da36096fe1ffdc39cddd41ad840adc04178be680c6ad"
+  },
+  "patches/small-gemm/Build-SmallGemm.ps1": {
+    "bytes": 2969,
+    "sha256": "6de86d1640d51f9a6aa847d1f3e0469257aef19937d0ad08ef29b462f7c19960"
+  },
+  "patches/small-gemm/kernel.hip": {
+    "bytes": 1070,
+    "sha256": "cad5608156ce5acdb453e36a2253c3bf3f07ae65aa9f921966f3160b43fe32b9"
+  },
+  "patches/small-gemm/kernel32.def": {
+    "bytes": 264,
+    "sha256": "69c4df1c06695a34b6eb471e40b1cb4c79892503271ce0b640b9cda5c662cdda"
+  },
+  "patches/small-gemm/make-exports.py": {
+    "bytes": 2388,
+    "sha256": "f4e0145b6f7116baadaa5bbe486c20e4ef9a0b626c2b0be41039f6bf0f36538e"
+  },
+  "patches/small-gemm/shim.c": {
+    "bytes": 7574,
+    "sha256": "f92c27360446790d256732115b4078437b3840dfcb0ff505fe0beea434c5d780"
+  },
+  "tests/check-cuda.py": {
+    "bytes": 4807,
+    "sha256": "e7b6d14bf4f97fda833f136e24c234550bc63836906e4c04595bf9bff3a92b57"
+  },
+  "tests/check-gemm.py": {
+    "bytes": 9373,
+    "sha256": "a96e9199584ef49c30d6a7f19a2d963fe9404299acdda6fb6874fc9a84789b61"
+  },
+  "tests/dxgi-adapters.py": {
+    "bytes": 2068,
+    "sha256": "83472ec8346d73a76ab223a07d5fc10e619c41e299fcefc7430c46c4bd684286"
+  },
+  "VALIDATION.json": {
+    "bytes": 414,
+    "sha256": "0e0a015cc6a37d2c8c24c42f88e4f49a44f4ea02bb33b4b574723e00f3d69c2b"
+  }
+}
