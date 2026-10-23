@@ -6,6 +6,6 @@
 - Do not run generation, GPU tests or new benchmarks unless the human explicitly requests them.
 - Preserve the distinction between measured RX580 results and the untested Pascal recipe.
 - Never invent per-patch gains: existing percentages compare complete CPU/GPU requests, not isolated patches.
-- ComfyUI was installed but not launched in the original experiment. No ComfyUI image-speed claim is supported.
+- ComfyUI was installed but not launched in the original experiment. No ComfyUI image-generation speed claim is supported.
 - Release archives contain this project's source installer only. Third-party software is downloaded from its publisher.
 - Preserve GPL notices and upstream license/source links. Do not upload the original private portable archive.

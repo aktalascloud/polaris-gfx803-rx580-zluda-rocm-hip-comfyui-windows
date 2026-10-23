@@ -28,6 +28,7 @@ that their publishers have not granted.
 | OpenVINO | [Apache-2.0](https://github.com/openvinotoolkit/openvino/blob/master/LICENSE), downloaded package notices |
 | Microsoft VC++ runtime prerequisite | [Official publisher download](https://aka.ms/vs/17/release/vc_redist.x64.exe); install under Microsoft's terms, not redistributed here |
 | Optional Qwen GGUF | [Hugging Face model card and Apache-2.0 declaration](https://huggingface.co/mradermacher/Qwen3-4B-Instruct-2507-heretic-uncens-i1-GGUF); no weights included |
+| Linked KoboldCpp media pipeline | [Separate project and component-license notices](https://github.com/aktalascloud/koboldcpp-media-pipeline/blob/main/docs/LICENSES.md): AGPL-3.0 code; optional GPEN weights are Non-Commercial. Not bundled or installed here |
 
 ## Important vendor boundaries
 

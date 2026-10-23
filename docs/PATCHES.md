@@ -13,7 +13,7 @@ not zero improvement. The percentages in the README compare whole CPU/GPU reques
 | KoboldCPP `--blasbatchsize -1`, `nommq`, pinned-memory disabled | Normal batching gave unrelated text; MMQ failed. Disable BLAS batching while retaining real GPU offload. Three correct simple controls and four matching CPU/GPU continuations resulted. | N/A versus broken batching; measured complete-request CPU/GPU deltas are +1.94% to +54.14%, not a causal patch claim |
 | ComfyUI offline-startup patch | Replace auto-pip with a package-version error and replace the auto-`git pull` launcher. Keep dependencies stable. [GPL diff](../patches/comfy-offline-startup.diff). | N/A; ComfyUI not launched |
 | Conservative ComfyUI launch profile | FP32, lowvram, CPU VAE, sub-quadratic attention, no xformers/CUDA malloc async/external API nodes. | N/A; no images/s measurement |
-| Separate ONNX environment | Keep NumPy 2.2.6 DirectML/OpenVINO separate from NumPy 1.26.4 Torch. DirectML physical Radeon passed; OpenVINO CPU passed. | N/A; no paired backend speed result retained |
+| Separate ONNX environment | Keep the NumPy 2.2.6 DirectML/OpenVINO environment separate from the NumPy 1.26.4 Torch environment. DirectML inference on the physical Radeon passed; OpenVINO CPU passed. | N/A; no paired backend speed result retained |
 
 ## Negative results retained as findings, not bundled experiments
 

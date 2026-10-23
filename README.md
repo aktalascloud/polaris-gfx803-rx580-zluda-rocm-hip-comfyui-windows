@@ -1,7 +1,7 @@
 # Pascal & RX580 AI on Windows — AVX2 · KoboldCPP · ZLUDA · ComfyUI
 
 Pinned Windows recipes for **AMD RX 580 / Polaris gfx803** using ZLUDA/HIP and an
-**experimental, unmeasured NVIDIA Pascal** native-CUDA profile. Includes ComfyUI,
+**experimental, unmeasured NVIDIA Pascal** profile using native CUDA. Includes ComfyUI,
 KoboldCPP, ONNX Runtime DirectML and OpenVINO CPU.
 
 [Русское описание](README.ru.md) · [Patch catalogue](docs/PATCHES.md) ·
@@ -18,8 +18,22 @@ the percentages must not be combined or presented as the same experiment.
 
 Search terms: NVIDIA Pascal, AMD Radeon RX580 / RX 580, Polaris gfx803, AVX2,
 Kobold / KoboldCPP, ZLUDA, ComfyUI, HIP / ROCm, CUDA 11.8, DirectML, OpenVINO.
-AVX2 describes the reference CPU capability and the related optimized fork;
+AVX2 is an instruction set supported by the reference CPU and used by the related optimized fork;
 no isolated AVX2 patch gain was measured in this repository.
+
+## Media workflows without ComfyUI
+
+The author's [KoboldCpp media pipeline](https://github.com/aktalascloud/koboldcpp-media-pipeline)
+provides a separate Windows photo/music workflow using the optimized KoboldCpp
+CPU/Vulkan fork as the model backend. It adds automatic model switching, face
+refinement, whole-image restoration and optional Helaman ATD 4× upscaling through
+A1111/OpenAI-compatible interfaces, with OpenWebUI integration documented separately.
+
+This is an alternative integration path alongside ComfyUI, **not an additional
+component installed by this release**. Use that project's setup instructions,
+releases and model-license notices. Its optional GPEN weights are Non-Commercial;
+the code's license does not grant rights to those weights. Video support is deferred.
+The pipeline's measurements are separate from the ZLUDA results below.
 
 ## What is actually verified
 
@@ -30,10 +44,10 @@ The driver was preserved. This project does not install or update GPU drivers.
 | Component | Evidence/status |
 |---|---|
 | KoboldCPP 1.95.1 + ZLUDA 3.9.5 + HIP 5.7.1 | Correct control answers and four identical CPU/GPU continuations; 24/37 GPU layers |
-| PyTorch 2.2.1+cu118 | FP32/FP16 GEMM, a small convolution network, 60 BMM/copy iterations, LayerNorm/Softmax passed earlier |
+| PyTorch 2.2.1+cu118 | FP32/FP16 GEMM, a small convolutional network, 60 BMM/copy iterations and LayerNorm/Softmax passed earlier |
 | DirectML 1.24.4 | Physical Radeon inference passed earlier, CPU fallback disabled |
 | OpenVINO 2026.4.1 | CPU passed earlier; **Ellesmere GPU returned incorrect zeros** |
-| ComfyUI-Zluda, commit `c0c011dca91b595091a4b032770da366fc90fb2b` | Installed only; **not launched or image-validated** |
+| ComfyUI-Zluda, commit `c0c011dca91b595091a4b032770da366fc90fb2b` | Installed only; **not launched or validated through image generation** |
 | NVIDIA Pascal | Native CUDA 11.8 recipe only; **no Pascal measurements** |
 
 **No new model generations or GPU benchmarks were run to publish this project.**
@@ -44,7 +58,7 @@ variation, not another measured run. Other cards/drivers are not certified.
 
 ## Recorded speed and token counts
 
-One diagnostic continuation generated **128 tokens at 8.46 decode tokens/s**:
+One diagnostic continuation generated **128 tokens at 8.46 tokens/s during decoding**:
 15.13 s decoding, 17.07 s total request time; prefill 8.77 tokens/s.
 This is one bring-up measurement, not a sustained benchmark.
 
@@ -56,7 +70,7 @@ This is one bring-up measurement, not a sustained benchmark.
 | Longer output | 11.563 | 11.343 | +1.94% | 1.90% |
 
 These are **single paired end-to-end timings**, CPU with zero GPU layers versus
-24 GPU layers, same Qwen3-4B IQ4_XS model, eight threads, context 1024, BLAS batch
+24 GPU layers, the same Qwen3-4B IQ4_XS model, eight threads, context 1024 and BLAS batch
 disabled on both. They include prompt processing, caching and request overhead.
 Other setup/compilation activity was occurring during bring-up; measurements
 were not isolated, repeated or randomized. Percentages are **not decode-rate
@@ -114,10 +128,10 @@ Use the launchers **inside the installed `runtime` folder**:
 
 ## Models are not distributed
 
-Use `Download-Model.cmd` for the optional, hash-pinned
-[Qwen3-4B IQ4_XS model card](https://huggingface.co/mradermacher/Qwen3-4B-Instruct-2507-heretic-uncens-i1-GGUF),
+Use `Download-Model.cmd` to download the optional, hash-pinned
+[Qwen3-4B IQ4_XS model](https://huggingface.co/mradermacher/Qwen3-4B-Instruct-2507-heretic-uncens-i1-GGUF),
 or download your own properly licensed GGUF into `runtime/models`.
-The script requests no account credential and downloads **from Hugging Face**,
+The script requests no account credentials and downloads **from Hugging Face**,
 not this repository or its release. Model weights are never uploaded here.
 
 ComfyUI checkpoints are separate downloads too. Put a compatible, licensed
