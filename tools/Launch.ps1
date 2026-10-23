@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 param(
-    [ValidateSet('Comfy','Kobold','PythonCuda')][string]$App='Comfy',
-    [string]$ModelPath='', [int]$GpuLayers=24, [int]$Port=0,
+    [ValidateSet('Comfy','PythonCuda')][string]$App='Comfy',
+    [int]$Port=0,
     [Parameter(ValueFromRemainingArguments=$true)][string[]]$ExtraArguments
 )
 $ErrorActionPreference='Stop'
@@ -13,7 +13,6 @@ if($backend -ne 'AMD'){throw 'This package targets AMD Polaris/gfx803 only'}
 $python=Join-Path $root 'envs\cuda\python.exe'
 $env:CUDA_MODULE_LOADING='LAZY'
 $env:ZLUDA_WAVE64_SLOW_MODE='0'
-$env:GGML_CUDA_NO_PINNED='1'
 $env:PYTHONUNBUFFERED='1'
 $env:HF_HUB_DISABLE_TELEMETRY='1'
 $env:DO_NOT_TRACK='1'
@@ -28,16 +27,9 @@ if($backend -eq 'AMD'){
     $env:PATH=(Join-Path $root 'hip\bin')+';'+(Join-Path $root 'zluda')+';'+$env:PATH
 }
 if($App -eq 'Comfy'){
+    if(!(Test-Path -LiteralPath (Join-Path $root 'apps\ComfyUI\main.py'))){throw 'ComfyUI was not selected during installation. Run Install.cmd -WithComfyUI with a fresh destination.'}
     if(!$Port){$Port=8188}
     $arguments=@('-I',(Join-Path $PSScriptRoot 'run_comfy.py'),'--listen','127.0.0.1','--port',"$Port",'--auto-launch','--force-fp32','--cpu-vae','--lowvram','--reserve-vram','0.9','--use-quad-cross-attention','--force-upcast-attention','--disable-cuda-malloc','--disable-xformers','--disable-api-nodes')
-} elseif($App -eq 'Kobold'){
-    if(!$Port){$Port=5021}
-    if(!$ModelPath){
-        $models=@(Get-ChildItem -LiteralPath (Join-Path $root 'models') -Filter '*.gguf' -File)
-        if($models.Count -ne 1){throw 'Place one GGUF in runtime/models, or pass -ModelPath. See Hugging Face links in README.'}
-        $ModelPath=$models[0].FullName
-    }
-    $arguments=@('-I',(Join-Path $PSScriptRoot 'run_kobold.py'),'--usecublas','normal','0','nommq','--model',$ModelPath,'--contextsize','1024','--gpulayers',"$GpuLayers",'--threads','8','--blasthreads','8','--blasbatchsize','-1','--host','127.0.0.1','--port',"$Port",'--skiplauncher')
 } else {
     $arguments=@('-I',(Join-Path $PSScriptRoot 'run_python.py'))
 }

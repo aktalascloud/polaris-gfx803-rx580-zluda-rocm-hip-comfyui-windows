@@ -1,42 +1,42 @@
-# Patch and workaround catalogue
+# Automatically applied patches and compatibility settings
 
-The measured target is AMD Polaris gfx803. No isolated before/after performance
-experiment exists for any individual change below. `N/A` means **not measured**,
-not zero improvement. The percentages in the README compare whole CPU/GPU requests.
-
-| Change | Purpose / observed outcome | Per-patch speed or token gain |
+| Component | Installed change | Isolated speed/token gain |
 |---|---|---|
-| advanced-lvl-up rocBLAS v1.0.0 DLL + matching gfx803 kernels | Restore usable GEMM kernels for Polaris. Validated DLL SHA256 `9e88918e65b81eeb128c69cd7a96ab495b101daf51f6f78f943445d7d4c5f70d`. FP32/FP16 checks passed earlier. | N/A; no valid stock-gfx803 throughput baseline |
-| ZLUDA 3.9.5 / Torch 2.2.1+cu118 DLL aliases | Replace Torch `cublas64_11.dll`, `cusparse64_11.dll`, `nvrtc64_112_0.dll` with ZLUDA counterparts; preserve original NVRTC as `nvrtc_cuda.dll`. | N/A; compatibility change |
-| Explicit local HIP/rocBLAS loading | Prevent loading an unrelated rocBLAS or silently selecting the wrong kernel folder. No global PATH or driver replacement. | N/A |
-| `DISABLE_ADDMM_CUDA_LT=1`; AMD cuDNN/TF32/flash/memory-efficient SDP disabled | Avoid unsupported vendor-specific execution paths. Reuse the upstream ComfyUI-Zluda fallbacks, including CPU audio/TopK operations where that fork applies them. | N/A; no isolated timing |
-| KoboldCPP `--blasbatchsize -1`, `nommq`, pinned-memory disabled | Normal batching gave unrelated text; MMQ failed. Disable BLAS batching while retaining real GPU offload. Three correct simple controls and four matching CPU/GPU continuations resulted. | N/A versus broken batching; measured complete-request CPU/GPU deltas are +1.94% to +54.14%, not a causal patch claim |
-| ComfyUI offline-startup patch | Replace auto-pip with a package-version error and replace the auto-`git pull` launcher. Keep dependencies stable. [GPL diff](../patches/comfy-offline-startup.diff). | N/A; ComfyUI not launched |
-| Conservative ComfyUI launch profile | FP32, lowvram, CPU VAE, sub-quadratic attention, no xformers/CUDA malloc async/external API nodes. | N/A; no images/s measurement |
-| Separate ONNX environment | Keep the NumPy 2.2.6 DirectML/OpenVINO environment separate from the NumPy 1.26.4 Torch environment. DirectML inference on the physical Radeon passed; OpenVINO CPU passed. | N/A; no paired backend speed result retained |
+| HIP SDK 5.7.1 | Original SDK extracted without running AMD Setup; existing GPU driver preserved | Not measured |
+| advanced-lvl-up rocBLAS v1.0.0 | Replace rocblas.dll and the complete matching gfx803 kernel directory | Not measured; historical FP32/FP16 checks passed |
+| ZLUDA 3.9.5 | Pinned upstream ROCm5 build; not a locally rebuilt/patched ZLUDA | Not measured |
+| PyTorch 2.2.1+cu118 | ZLUDA aliases for cublas64_11.dll, cusparse64_11.dll and nvrtc64_112_0.dll; original NVRTC kept as nvrtc_cuda.dll | Compatibility change; not measured |
+| Local loading | HIP_PATH, ROCBLAS_TENSILE_LIBPATH, local DLL search, DISABLE_ADDMM_CUDA_LT=1; Torch cuDNN/TF32 disabled | Not measured |
+| Optional ComfyUI | [GPL source diff](../patches/comfy-offline-startup.diff) disables startup auto-pip and auto-update; conservative FP32/low-VRAM/CPU-VAE profile | Not measured; generation unverified |
+| DirectML / OpenVINO | Separate NumPy 2.2.6 environment, distinct from Torch NumPy 1.26.4 | No paired timing; Radeon DirectML and OpenVINO CPU previously passed |
 
-## Negative results retained as findings, not bundled experiments
+Validated rocblas.dll SHA256:
+`9e88918e65b81eeb128c69cd7a96ab495b101daf51f6f78f943445d7d4c5f70d`.
+Archive hashes and download URLs: [components.json](../profiles/components.json).
+The DLL and its kernel directory must be used together.
 
-- ZLUDA Wave64 slow mode: RMS_NORM `invalid configuration argument`.
-- Kobold MMQ path: `invalid device function`.
-- KoboldCPP 1.123.1: GPU allocation `operation not supported` for a 2159.88 MiB buffer.
-- likelovewant v0.5.7 gfx803-optic, gfx803-vega-fallback and common HIP5.7 libraries:
-  numerical checks failed. The downloaded setup uses the validated advanced-lvl-up library.
-- `GPU_FORCE_BLIT_COPY_SIZE=100000`: did not fix the incorrect Kobold text on this Windows stack.
-- Tiny batched GEMM `[3,1,2] × [3,2,1]`: no Tensile solution.
-- OpenVINO GPU/Ellesmere: incorrect zero MatMul; CPU is the documented target.
-- Full 250-convolution Torch inference was not confirmed; its initial compilation was stopped.
+## Historical numerical evidence
 
-## Research references, not installed Windows patches
+RX580 2048SP/gfx803; recorded 2026-10-22. Sanitized summary only, no raw logs.
 
-[Schaka/rocm-gfx803](https://github.com/Schaka/rocm-gfx803) contains Linux ROCm
-Wave64, small-GEMM and TC-coherence fixes. Those are not Windows HIP 5.7 DLL
-replacements and were not applied to CUDA PyTorch here. Their reported Linux
-speedups are **not measurements from this project**. The Windows reuse probe
-passed 60 BMM/copy iterations; LayerNorm/Softmax widths 1024/2560/9728 also passed.
+| Check | Maximum absolute error | Outcome |
+|---|---:|---|
+| FP32 GEMM regression | 1.0609626770019531e-05 | Passed under its original tolerance |
+| FP16 GEMM regression | 0.0100555419921875 | Passed under its original FP16 tolerance |
+| Two-layer convolution network | 2.980232238769531e-07 | Passed |
+| 60 BMM/copy iterations | 1.1444091796875e-05 | Passed |
+| LayerNorm/Softmax, width 1024 | 9.313225746154785e-09 | Passed |
 
-## Target architecture
+No new GPU test was performed to create this table. These are numerical checks,
+not throughput measurements or certification for arbitrary shapes/applications.
 
-This package targets **AMD Polaris / gfx803 / RX580**. The historical hardware
-measurements were made on one RX580 2048SP with 8 GiB VRAM. Other cards and
-drivers are not automatically certified; no other GPU-family profile is included.
+## Excluded candidates and research
+
+- likelovewant v0.5.7 gfx803-optic, gfx803-vega-fallback and common HIP5.7 candidates failed previous numerical checks; they are not installed.
+- Tiny batched GEMM still has unsupported shapes/no Tensile solution.
+- OpenVINO Ellesmere GPU returned incorrect zeros; use OpenVINO CPU.
+- [Schaka/rocm-gfx803](https://github.com/Schaka/rocm-gfx803) Linux Wave64/small-GEMM/TC-coherence patches were studied, not applied to Windows HIP DLLs. Linux speedups must not be attributed to this package.
+- No complete ComfyUI generation or isolated per-blob speed measurement is available.
+
+The installed toolkit already applies the required Windows overrides. The repository
+ships source patches and pinned acquisition logic, not a mirror of third-party binaries.

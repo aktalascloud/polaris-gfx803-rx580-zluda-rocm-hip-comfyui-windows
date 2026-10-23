@@ -17,7 +17,7 @@ def configure():
         zluda=ROOT/'zluda'
         os.environ['HIP_PATH']=str(ROOT/'hip')
         os.environ['ROCBLAS_TENSILE_LIBPATH']=str(hip/'rocblas'/'library')
-        for path in (hip,zluda,ROOT/'apps'/'KoboldCPP'):
+        for path in (hip,zluda):
             HANDLES.append(os.add_dll_directory(str(path)))
         # The HIP runtime belongs to the installed AMD GPU driver, not this release.
         HANDLES.append(ctypes.WinDLL(str(Path(os.environ['SystemRoot'])/'System32'/'amdhip64.dll')))

@@ -19,16 +19,13 @@ that their publishers have not granted.
 | torchvision / torchaudio | [torchvision source](https://github.com/pytorch/vision/tree/v0.17.1), [torchaudio source](https://github.com/pytorch/audio/tree/v2.2.1), their respective BSD-style licenses |
 | CUDA/NVRTC/cuDNN libraries in upstream wheels | [NVIDIA CUDA 11.8 EULA](https://docs.nvidia.com/cuda/archive/11.8.0/eula/index.html); applicable NVIDIA component terms are not replaced here |
 | ComfyUI-Zluda | [GPL-3.0 source snapshot](https://github.com/patientx/ComfyUI-Zluda/tree/c0c011dca91b595091a4b032770da366fc90fb2b); preserve its GPL notices |
-| KoboldCPP 1.95.1 | [AGPL-3.0, with separately licensed bundled components](https://github.com/LostRuins/koboldcpp/tree/cdda9d16e0bb7ca5239bb8d5eed2fb070f7480ad); exact corresponding source is linked, executable is not mirrored |
 | ZLUDA fork | [MIT / Apache-2.0 upstream licenses](https://github.com/lshqqytiger/ZLUDA/tree/5e717459179dc272b7d7d23391f0fad66c7459cf); downloaded from the pinned upstream release |
 | Patched gfx803 rocBLAS | [Patch publisher / source release](https://github.com/advanced-lvl-up/Rx470-Vega10-Rx580-gfx803-gfx900-fix-AMD-GPU/releases/tag/v1.0.0); [rocBLAS license](https://github.com/ROCm/rocBLAS/blob/rocm-5.7.1/LICENSE.md). No third-party patch binary is mirrored here |
 | HIP SDK 5.7.1 | [AMD SDK terms](https://www.amd.com/en/developer/resources/rocm-hub/eula/licenses.html), [official SDK page](https://www.amd.com/en/developer/resources/rocm-hub/hip-sdk.html) |
 | 7-Zip extraction utility | [License, including LGPL and unRAR restrictions where applicable](https://www.7-zip.org/license.txt), [source](https://www.7-zip.org/download.html); downloaded only when needed |
 | ONNX Runtime DirectML | [MIT](https://github.com/microsoft/onnxruntime/blob/v1.24.4/LICENSE), upstream package/component notices |
 | OpenVINO | [Apache-2.0](https://github.com/openvinotoolkit/openvino/blob/master/LICENSE), downloaded package notices |
-| Microsoft VC++ runtime prerequisite | [Official publisher download](https://aka.ms/vs/17/release/vc_redist.x64.exe); install under Microsoft's terms, not redistributed here |
-| Optional Qwen GGUF | [Hugging Face model card and Apache-2.0 declaration](https://huggingface.co/mradermacher/Qwen3-4B-Instruct-2507-heretic-uncens-i1-GGUF); no weights included |
-| Linked KoboldCpp media pipeline | [Separate project and component-license notices](https://github.com/aktalascloud/koboldcpp-media-pipeline/blob/main/docs/LICENSES.md): AGPL-3.0 code; optional GPEN weights are Non-Commercial. Not bundled or installed here |
+| Microsoft VC++ runtime prerequisite | [Official publisher download](https://aka.ms/vs/17/release/vc_redist.x64.exe); automatically downloaded and installed if missing, under Microsoft's terms; not redistributed here |
 
 ## Important vendor boundaries
 

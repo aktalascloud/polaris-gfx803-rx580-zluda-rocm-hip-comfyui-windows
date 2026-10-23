@@ -1,4 +1,7 @@
 @echo off
+setlocal
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\Install.ps1" %*
-if errorlevel 1 pause
-exit /b %ERRORLEVEL%
+set "result=%ERRORLEVEL%"
+if not "%result%"=="0" echo Installation failed. Review the error above.
+if "%~1"=="" pause
+exit /b %result%

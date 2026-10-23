@@ -8,6 +8,6 @@ The ComfyUI startup diff modifies patientx/ComfyUI-Zluda at commit
 copyright remain applicable. The full upstream source is linked in
 THIRD_PARTY_NOTICES.md and downloaded by the installer from the pinned snapshot.
 
-ZLUDA, AMD/ROCm libraries, PyTorch, KoboldCPP and all other downloaded components
+ZLUDA, AMD/ROCm libraries, PyTorch and all other downloaded components
 remain the work of their respective maintainers. Their licenses are not replaced
 by this project's license. No vendor endorsement is implied.

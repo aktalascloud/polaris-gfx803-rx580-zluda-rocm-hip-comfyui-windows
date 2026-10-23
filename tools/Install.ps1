@@ -4,7 +4,10 @@ param(
     [ValidateSet('Auto','AMD')][string]$Backend='Auto',
     [string]$InstallRoot=(Join-Path (Split-Path $PSScriptRoot -Parent) 'runtime'),
     [string]$HipRoot='',
-    [switch]$AcceptThirdPartyLicenses
+    [switch]$AcceptThirdPartyLicenses,
+    [switch]$WithComfyUI,
+    [switch]$WithoutComfyUI,
+    [switch]$NoDesktopShortcut
 )
 $ErrorActionPreference='Stop'
 [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
@@ -12,6 +15,10 @@ $source=Split-Path $PSScriptRoot -Parent
 if(![Environment]::Is64BitOperatingSystem -or ![Environment]::Is64BitProcess){throw 'Use 64-bit Windows PowerShell on Windows x64'}
 $components=Get-Content -LiteralPath (Join-Path $source 'profiles\components.json') -Raw | ConvertFrom-Json
 $root=[IO.Path]::GetFullPath($InstallRoot)
+if($WithComfyUI -and $WithoutComfyUI){throw 'Choose only one ComfyUI option'}
+if(!$WithComfyUI -and !$WithoutComfyUI){
+    $WithComfyUI=((Read-Host 'Also install ComfyUI and its desktop shortcut? [Y/n]') -notmatch '^(n|no)$')
+}
 if(!$AcceptThirdPartyLicenses){
     Write-Host 'Read THIRD_PARTY_NOTICES.md and the linked vendor terms before downloading.'
     Write-Host 'No model or third-party executable is distributed in this installer archive.'
@@ -25,9 +32,6 @@ if($Backend -eq 'Auto'){
 }
 if(!(Test-Path -LiteralPath "$env:SystemRoot\System32\amdhip64.dll")){
     throw 'The installed AMD driver does not provide amdhip64.dll. This installer never installs or replaces a GPU driver.'
-}
-if(@('msvcp140.dll','msvcp140_1.dll','msvcp140_2.dll','vcruntime140_1.dll') | Where-Object {!(Test-Path -LiteralPath (Join-Path "$env:SystemRoot\System32" $_))}){
-    throw 'Microsoft Visual C++ 2015-2022 x64 Runtime is required. Download it from https://aka.ms/vs/17/release/vc_redist.x64.exe, then retry.'
 }
 New-Item -ItemType Directory -Path $root -Force | Out-Null
 $downloads=Join-Path $root '.downloads'
@@ -49,7 +53,7 @@ function Fetch([string]$Name,[string]$FileName){
         if((Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -ne $asset.sha256){throw "SHA256 mismatch: $Name"}
     } elseif($asset.signature_publisher){
         $signature=Get-AuthenticodeSignature -LiteralPath $path
-        if($signature.Status -ne 'Valid' -or $signature.SignerCertificate.Subject -notmatch $asset.signature_publisher){throw 'AMD installer signature verification failed'}
+        if($signature.Status -ne 'Valid' -or $signature.SignerCertificate.Subject -notmatch $asset.signature_publisher){throw "Publisher signature verification failed: $Name"}
     } else{throw "No integrity policy for $Name"}
     return $path
 }
@@ -57,6 +61,13 @@ function AdminExtract([string]$Msi,[string]$Destination){
     New-Item -ItemType Directory -Path $Destination -Force | Out-Null
     $process=Start-Process -FilePath "$env:SystemRoot\System32\msiexec.exe" -ArgumentList @('/a',('"'+$Msi+'"'),'/qn',('TARGETDIR="'+$Destination+'"')) -WindowStyle Hidden -Wait -PassThru
     if($process.ExitCode -ne 0){throw "MSI administrative extraction failed ($($process.ExitCode)). No driver installation was requested."}
+}
+if(@('msvcp140.dll','msvcp140_1.dll','msvcp140_2.dll','vcruntime140_1.dll') | Where-Object {!(Test-Path -LiteralPath (Join-Path "$env:SystemRoot\System32" $_))}){
+    $vc=Fetch 'vcredist' 'vc_redist.x64.exe'
+    Write-Host 'Installing signed Microsoft VC++ x64 runtime; Windows may request administrator consent.'
+    $process=Start-Process -FilePath $vc -ArgumentList @('/install','/quiet','/norestart') -Verb RunAs -WindowStyle Hidden -Wait -PassThru
+    if($process.ExitCode -notin @(0,1638,3010)){throw "VC++ installation failed ($($process.ExitCode))"}
+    if(@('msvcp140.dll','msvcp140_1.dll','msvcp140_2.dll','vcruntime140_1.dll') | Where-Object {!(Test-Path -LiteralPath (Join-Path "$env:SystemRoot\System32" $_))}){throw 'VC++ runtime remains unavailable; restart Windows if requested by Microsoft, then retry in a fresh folder'}
 }
 $pythonArchive=Fetch 'python' 'python-embed.zip'
 $pipWheel=Fetch 'pip' 'pip-bootstrap.whl'
@@ -73,13 +84,15 @@ foreach($environment in @($cuda,$onnx)){
 $cudaPython=Join-Path $cuda 'python.exe'
 $onnxPython=Join-Path $onnx 'python.exe'
 $cudaRequirements=Join-Path $source 'requirements\cuda-py312.txt'
+$installRequirements=if($WithComfyUI){Join-Path $source 'requirements\comfy-py312.txt'}else{$cudaRequirements}
 $onnxRequirements=Join-Path $source 'requirements\onnx-py312.txt'
 $torchWheel=Fetch 'torch' 'torch-2.2.1+cu118-cp312-cp312-win_amd64.whl'
 CheckedRun $cudaPython @('-I','-m','pip','--isolated','install','--no-cache-dir','--disable-pip-version-check','-c',$cudaRequirements,$torchWheel,'torchvision==0.17.1+cu118','torchaudio==2.2.1+cu118','--index-url','https://download.pytorch.org/whl/cu118','--extra-index-url','https://pypi.org/simple')
-CheckedRun $cudaPython @('-I','-m','pip','--isolated','install','--no-cache-dir','--only-binary=:all:','--disable-pip-version-check','-r',$cudaRequirements,'--index-url','https://pypi.org/simple')
+CheckedRun $cudaPython @('-I','-m','pip','--isolated','install','--no-cache-dir','--only-binary=:all:','--disable-pip-version-check','-r',$installRequirements,'--index-url','https://pypi.org/simple')
 CheckedRun $onnxPython @('-I','-m','pip','--isolated','install','--no-cache-dir','--only-binary=:all:','--disable-pip-version-check','-r',$onnxRequirements,'--index-url','https://pypi.org/simple')
 $apps=Join-Path $root 'apps'
 New-Item -ItemType Directory -Path $apps -Force | Out-Null
+if($WithComfyUI){
 $comfyArchive=Fetch 'comfy' 'comfy-source.zip'
 $unpacked=Join-Path $downloads 'comfy-source'
 CheckedRun $cudaPython @('-I',(Join-Path $source 'tools\prepare.py'),'unzip',$comfyArchive,$unpacked)
@@ -88,12 +101,7 @@ $comfy=Join-Path $apps 'ComfyUI'
 Move-Item -LiteralPath $sourceDirectory.FullName -Destination $comfy
 CheckedRun $cudaPython @('-I',(Join-Path $source 'tools\prepare.py'),'patch-comfy',$comfy,(Join-Path $source 'patches\comfy-offline-startup.diff'))
 CheckedRun $cudaPython @('-I',(Join-Path $source 'tools\prepare.py'),'prune-comfy',$comfy)
-$kobold=Join-Path $apps 'KoboldCPP'
-New-Item -ItemType Directory -Path $kobold -Force | Out-Null
-$koboldArchive=Fetch 'kobold' 'koboldcpp-oldpc.exe'
-CheckedRun $cudaPython @('-I',(Join-Path $source 'tools\prepare.py'),'extract-kobold',$koboldArchive,$kobold)
-$frontend=Fetch 'kobold_python' 'koboldcpp.py'
-Copy-Item -LiteralPath $frontend -Destination (Join-Path $kobold 'koboldcpp.py')
+}
 if($Backend -eq 'AMD'){
     $sevenzip=Get-Command '7z.exe' -ErrorAction SilentlyContinue
     $sevenzipPath=if($sevenzip){$sevenzip.Source}else{Join-Path $env:ProgramFiles '7-Zip\7z.exe'}
@@ -147,12 +155,24 @@ if($Backend -eq 'AMD'){
     foreach($pair in @(@('cublas.dll','cublas64_11.dll'),@('cusparse.dll','cusparse64_11.dll'),@('nvrtc.dll','nvrtc64_112_0.dll'))){
         Copy-Item -LiteralPath (Join-Path $root ('zluda\'+$pair[0])) -Destination (Join-Path $torchLib $pair[1]) -Force
     }
-    Copy-Item -LiteralPath (Join-Path $root 'zluda\cublas.dll') -Destination (Join-Path $kobold 'cublas64_11.dll') -Force
 }
 Copy-Item -LiteralPath (Join-Path $source 'tools') -Destination (Join-Path $root 'tools') -Recurse
-foreach($name in @('Start-ComfyUI.cmd','Start-Kobold.cmd','Python-CUDA.cmd','Python-ONNX.cmd','Download-Model.cmd')){Copy-Item -LiteralPath (Join-Path $source $name) -Destination (Join-Path $root $name)}
-@{backend=$Backend;version='0.1.1';architecture='Polaris/gfx803';comfy_commit='c0c011dca91b595091a4b032770da366fc90fb2b';models_included=$false} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $root 'profile.json') -Encoding UTF8
+foreach($name in @('Python-CUDA.cmd','Python-ONNX.cmd','Run-ZLUDA.cmd','HIP-Shell.cmd')){Copy-Item -LiteralPath (Join-Path $source $name) -Destination (Join-Path $root $name)}
+@{backend=$Backend;version='0.2.0';comfy_installed=[bool]$WithComfyUI;architecture='Polaris/gfx803';comfy_commit='c0c011dca91b595091a4b032770da366fc90fb2b';models_included=$false} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $root 'profile.json') -Encoding UTF8
 New-Item -ItemType Directory -Path (Join-Path $root 'models'),(Join-Path $root 'temp') -Force | Out-Null
+if($WithComfyUI){
+    Copy-Item -LiteralPath (Join-Path $source 'Start-ComfyUI.cmd') -Destination $root
+    if(!$NoDesktopShortcut){
+        $desktop=[Environment]::GetFolderPath('DesktopDirectory')
+        if(!$desktop){throw 'Windows did not provide a desktop folder; use -NoDesktopShortcut'}
+        $shell=New-Object -ComObject WScript.Shell
+        $shortcut=$shell.CreateShortcut((Join-Path $desktop 'ComfyUI - Polaris ZLUDA.lnk'))
+        $shortcut.TargetPath=Join-Path $root 'Start-ComfyUI.cmd'
+        $shortcut.WorkingDirectory=$root
+        $shortcut.Description='ComfyUI with the local Polaris gfx803 ZLUDA runtime'
+        $shortcut.Save()
+    }
+}
 Write-Host "Installed into $root. No GPU driver, inference, generation or benchmark was run."
 Write-Host 'Download your own licensed models from Hugging Face; see README.md.'
 $downloadFull=(Resolve-Path -LiteralPath $downloads).ProviderPath
