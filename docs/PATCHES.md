@@ -1,64 +1,29 @@
-# Automatically applied patches and compatibility settings
+# Patch catalogue
 
-| Component | Installed change | Isolated speed/token gain |
+| Component | Change | Evidence / limit |
 |---|---|---|
-| HIP SDK 5.7.1 | Original SDK extracted without running AMD Setup; existing GPU driver preserved | Not measured |
-| advanced-lvl-up rocBLAS v1.0.0 | Replace rocblas.dll and the complete matching gfx803 kernel directory | Not measured; historical FP32/FP16 checks passed |
-| ZLUDA 3.9.5 | Pinned upstream ROCm5 build; not a locally rebuilt/patched ZLUDA | Not measured |
-| PyTorch 2.2.1+cu118 | ZLUDA aliases for cublas64_11.dll, cusparse64_11.dll and nvrtc64_112_0.dll; original NVRTC kept as nvrtc_cuda.dll | Compatibility change; not measured |
-| Local loading | HIP_PATH, ROCBLAS_TENSILE_LIBPATH, local DLL search, DISABLE_ADDMM_CUDA_LT=1; Torch cuDNN/TF32 disabled | Not measured |
-| Optional ComfyUI | [GPL source diff](../patches/comfy-offline-startup.diff) disables startup auto-pip and auto-update; conservative FP32/low-VRAM/CPU-VAE profile | Not measured; generation unverified |
-| DirectML / OpenVINO | Separate NumPy 2.2.6 environment, distinct from Torch NumPy 1.26.4 | No paired timing; Radeon DirectML and OpenVINO CPU previously passed |
+| HIP SDK 5.7.1 | SDK-only extraction; original driver retained | Fresh installation tested with an existing SDK |
+| advanced-lvl-up rocBLAS | Matched DLL and gfx803 kernel directory | Stable default; do not mix with optic/vega |
+| ZLUDA 3.9.5 | Pinned upstream ROCm5 build | Not a locally rewritten ZLUDA |
+| Torch CUDA aliases | cublas/cusparse/NVRTC replacements; original NVRTC preserved | Hash/alias checks passed |
+| Local runtime setup | Process-local HIP/PATH, explicit existing x64 HIP runtime, cuDNN/TF32 fallbacks | Current System32 runtime tested; other versions unverified |
+| Small-GEMM, opt-in | Tiny FP32 HIP kernel; four APIs overridden, 3932 exports forwarded; LLD ordinal repair | Baseline strided: 63/69; patched: 69/69 on four APIs; all 3936 original ordinals retained |
+| Torch DirectML, opt-in | Separate cp311 / Torch 2.4.1+cpu environment | FP32/FP16 matmul and conv2d passed |
+| ONNX / OpenVINO | Separate NumPy 2 environment, physical Radeon selection, CPU-only OpenVINO | Strict profiled DirectML and OpenVINO CPU passed |
+| ComfyUI | [Startup diff](../patches/comfy-offline-startup.diff), pinned dependencies, FP32/low-VRAM/CPU-VAE preset | Installed; startup/generation unverified |
+| Diagnostics | Model-free CUDA/PTX check; separate DXGI/Torch device enumeration | 64/64 vector elements; software adapters excluded |
 
-Validated rocblas.dll SHA256:
-`9e88918e65b81eeb128c69cd7a96ab495b101daf51f6f78f943445d7d4c5f70d`.
-Archive hashes and download URLs: [components.json](../profiles/components.json).
-The DLL and its kernel directory must be used together.
+Default backend SHA256: `9e88918e65b81eeb128c69cd7a96ab495b101daf51f6f78f943445d7d4c5f70d`.
+Exact download URLs/hashes: [components.json](../profiles/components.json).
 
-## Historical numerical evidence
+## Results and attribution
 
-RX580 2048SP/gfx803; recorded 2026-10-22. Sanitized summary only, no raw logs.
+- [Small-GEMM](SMALL-GEMM.md): build, guards, ABI, rollback and current validation.
+- [Blob retry](BLOB-RETRY-2026-10-23.md): optic instability, rejected vega/mixed sets and measured comparisons.
+- [Current evidence](../data/small-gemm-validation-20261023.json) and [source-machine history](../data/small-gemm-source-machine.json) remain separate.
 
-| Check | Maximum absolute error | Outcome |
-|---|---:|---|
-| FP32 GEMM regression | 1.0609626770019531e-05 | Passed under its original tolerance |
-| FP16 GEMM regression | 0.0100555419921875 | Passed under its original FP16 tolerance |
-| Two-layer convolution network | 2.980232238769531e-07 | Passed |
-| 60 BMM/copy iterations | 1.1444091796875e-05 | Passed |
-| LayerNorm/Softmax, width 1024 | 9.313225746154785e-09 | Passed |
-
-No new GPU test was performed to create this table. These are numerical checks,
-not throughput measurements or certification for arbitrary shapes/applications.
-
-## Excluded candidates and research
-
-- likelovewant v0.5.7 candidates were rejected earlier. The [2026-10-23 retry](BLOB-RETRY-2026-10-23.md) found optic passes selected cases but crashes on repeat and with application BLAS batch 512; vega and partial DLL/kernel mixes fail. None is installed automatically.
-- Tiny batched GEMM still has unsupported shapes/no Tensile solution.
-- OpenVINO Ellesmere GPU returned incorrect zeros; use OpenVINO CPU.
-- [Schaka/rocm-gfx803](https://github.com/Schaka/rocm-gfx803) Linux Wave64/small-GEMM/TC-coherence patches were studied, not applied to Windows HIP DLLs. Linux speedups must not be attributed to this package.
-- No complete ComfyUI generation or isolated per-blob speed measurement is available.
-
-The installed toolkit already applies the required Windows overrides. The repository
-ships source patches and pinned acquisition logic, not a mirror of third-party binaries.
-
-## Fresh isolated patch comparison
-
-[2026-10-23 methods and tables](BLOB-RETRY-2026-10-23.md) include two matched baseline FP32/FP16 runs, full optic/vega candidates, four partial swaps, diffusion-like FP32 GEMMs and controlled/practical Vulkan comparisons. These tests do not identify a safe faster rocBLAS replacement. The default patch set remains unchanged. Per-component percentages in the retry concern named GEMM shapes; application ratios are explicitly whole-configuration measurements.
-
-## Optional native small-GEMM correction (new contribution)
-
-[Source, build/apply/rollback commands and validation](SMALL-GEMM.md).
-`-WithSmallGemmPatch` compiles a bounded FP32 Windows/HIP kernel and forwarding
-shim; the matched original backend is preserved as rocblas_backend.dll.
-It fixes the six unsupported T/T tiny cases in the current native suite, while
-retaining 3936 original export ordinals (3932 forwarded / four overridden).
-The portable build also repairs AMD LLD 17 forwarder ordinal reassignment.
-This is Schaka-inspired local source, not the original Linux patches or an
-entire CUDA/ROCm implementation. Scalar/device/capture/query fallbacks and
-rollback are checked separately; no generation speedup is measured here.
-
-`-WithTorchDirectML` adds a separate cp311 environment; `Check-Zluda.cmd` adds
-model-free CUDA/PTX diagnostics. Adapter detection excludes DXGI software and
-keeps Torch DirectML indices separate. Explicit existing HIP runtime selection
-is supported without changing a GPU driver. Historical missing-shape reports
-above remain evidence about the unmodified original backend, not the optional fix.
+The unmodified backend still has unsupported tiny shapes. The optional Windows
+small-GEMM workaround addresses its tested subset; it is inspired by
+[Schaka's finding](https://github.com/Schaka/rocm-gfx803), not a direct application
+of Linux ROCm patches. OpenVINO Ellesmere GPU returned incorrect zeros; use CPU.
+No isolated generation-speed gain is established by these correctness checks.

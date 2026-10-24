@@ -1,36 +1,8 @@
 {
-  "strided": {
-    "cases": 69,
-    "supported_cases": 69,
-    "unsupported_cases": 0,
-    "max_abs_error": 3.337860107421875e-06,
-    "supported_results_match_cpu": true,
-    "nondefault_stream": false
-  },
-  "sgemm": {
-    "cases": 69,
-    "supported_cases": 69,
-    "unsupported_cases": 0,
-    "max_abs_error": 3.337860107421875e-06,
-    "supported_results_match_cpu": true,
-    "nondefault_stream": true
-  },
-  "ex": {
-    "cases": 69,
-    "supported_cases": 69,
-    "unsupported_cases": 0,
-    "max_abs_error": 3.337860107421875e-06,
-    "supported_results_match_cpu": true,
-    "nondefault_stream": true
-  },
-  "strided-ex": {
-    "cases": 69,
-    "supported_cases": 69,
-    "unsupported_cases": 0,
-    "max_abs_error": 3.337860107421875e-06,
-    "supported_results_match_cpu": true,
-    "nondefault_stream": true
-  },
+  "strided": {"cases": 69, "supported_cases": 69, "unsupported_cases": 0, "max_abs_error": 3.337860107421875e-06, "supported_results_match_cpu": true, "nondefault_stream": false},
+  "sgemm": {"cases": 69, "supported_cases": 69, "unsupported_cases": 0, "max_abs_error": 3.337860107421875e-06, "supported_results_match_cpu": true, "nondefault_stream": true},
+  "ex": {"cases": 69, "supported_cases": 69, "unsupported_cases": 0, "max_abs_error": 3.337860107421875e-06, "supported_results_match_cpu": true, "nondefault_stream": true},
+  "strided-ex": {"cases": 69, "supported_cases": 69, "unsupported_cases": 0, "max_abs_error": 3.337860107421875e-06, "supported_results_match_cpu": true, "nondefault_stream": true},
   "context": {
     "recorded_date": "2026-10-22",
     "device": "RX590 GME / gfx803",

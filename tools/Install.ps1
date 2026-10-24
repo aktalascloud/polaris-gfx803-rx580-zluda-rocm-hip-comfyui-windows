@@ -198,7 +198,7 @@ Copy-Item -LiteralPath (Join-Path $source 'tools') -Destination (Join-Path $root
 Copy-Item -LiteralPath (Join-Path $source 'patches') -Destination (Join-Path $root 'patches') -Recurse
 foreach($name in @('Python-CUDA.cmd','Python-ONNX.cmd','Run-ZLUDA.cmd','HIP-Shell.cmd','Check-Zluda.cmd')){Copy-Item -LiteralPath (Join-Path $source $name) -Destination (Join-Path $root $name)}
 if($WithTorchDirectML){Copy-Item -LiteralPath (Join-Path $source 'Python-DirectML.cmd') -Destination $root}
-$profile=@{backend=$Backend;version='0.3.0';comfy_installed=[bool]$WithComfyUI;torch_directml_installed=[bool]$WithTorchDirectML;architecture='Polaris/gfx803';comfy_commit='c0c011dca91b595091a4b032770da366fc90fb2b';models_included=$false;dxgi_device_id=$device.dxgi_index}
+$profile=@{backend=$Backend;version='0.3.1';comfy_installed=[bool]$WithComfyUI;torch_directml_installed=[bool]$WithTorchDirectML;architecture='Polaris/gfx803';comfy_commit='c0c011dca91b595091a4b032770da366fc90fb2b';models_included=$false;dxgi_device_id=$device.dxgi_index}
 $profile.original_nvrtc_sha256=$originalNvrtcHash
 if($HipRuntime){$profile.hip_runtime=(Resolve-Path -LiteralPath $HipRuntime).ProviderPath}
 $profile | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $root 'profile.json') -Encoding UTF8
