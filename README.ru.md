@@ -2,7 +2,7 @@
 
 **RX580 · gfx803 · Windows x64** — ZLUDA, HIP/ROCm, DirectML и OpenVINO с опциональным ComfyUI.
 
-[English](README.md) · [Скачать v0.3.1](https://github.com/aktalascloud/polaris-gfx803-rx580-zluda-rocm-hip-comfyui-windows/releases/tag/v0.3.1) · [Патчи](docs/PATCHES.md) · [Лицензии](THIRD_PARTY_NOTICES.md)
+[English](README.md) · [Скачать v0.3.1](https://github.com/aktalascloud/polaris-gfx803-rx580-zluda-rocm-hip-comfyui-windows/releases/tag/v0.4.0) · [Патчи](docs/PATCHES.md) · [Лицензии](THIRD_PARTY_NOTICES.md)
 
 ## Установка
 
@@ -26,6 +26,16 @@
 | `Run-ZLUDA.cmd`, `HIP-Shell.cmd` | Запуск совместимых приложений и оболочка с локальными путями HIP |
 
 CUDA/DirectML-запускатели поддерживают `-c`, `-m` и пути к скриптам. В профиле ComfyUI внешние API-ноды отключены; облачные ключи не настраиваются.
+
+## Автоматический attention
+
+В новых установках ComfyUI используется автоматический выбор, **без отдельного
+переключателя**. Малые обычные FP32-вызовы сохраняют штатный путь, крупные задачи,
+маски и FP16 обрабатываются плитками с поддержкой upcast и форм выхода.
+На RX580 прошли **146 GPU-случаев в двух процессах**. Синтетический FP32 attention
+`4096×4096`: **87.68 → 53.86 мс**, пик дополнительной памяти тензоров — **1024 → 69 МиБ**.
+Для малых вызовов есть накладные расходы диспетчеризации. Это не замер ускорения
+модели или генерации. [Результаты и откат](docs/ATTENTION.md).
 
 ## Патчи и результаты
 

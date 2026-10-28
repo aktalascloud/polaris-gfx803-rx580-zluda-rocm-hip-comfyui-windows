@@ -13,3 +13,5 @@
 - Small-GEMM is opt-in and bounded to tiny FP32 on the tested device/context. Preserve the original backend hash and all original export ordinals.
 - Historical source-machine results and current-machine checks must stay separate. Never promote generated shim, hsaco, import DLLs or raw reports into Git/source archives.
 - Keep Torch DirectML in its separate cp311 environment; DXGI and Torch device indices are not interchangeable.
+
+- Default attention is an automatic bounded dispatcher for pinned ComfyUI. Preserve masks, upcast, layouts, explicit backends and the small stock path; synthetic gains are not full-generation gains.

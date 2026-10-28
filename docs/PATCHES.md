@@ -11,6 +11,7 @@
 | Torch DirectML, opt-in | Separate cp311 / Torch 2.4.1+cpu environment | FP32/FP16 matmul and conv2d passed |
 | ONNX / OpenVINO | Separate NumPy 2 environment, physical Radeon selection, CPU-only OpenVINO | Strict profiled DirectML and OpenVINO CPU passed |
 | ComfyUI | [Startup diff](../patches/comfy-offline-startup.diff), pinned dependencies, FP32/low-VRAM/CPU-VAE preset | Installed; startup/generation unverified |
+| Automatic attention | Stock small FP32; bounded large/masked/FP16 inference, masks/upcast/layouts preserved | [146 GPU cases and tensor-level timing/memory evidence](ATTENTION.md); no generation claim |
 | Diagnostics | Model-free CUDA/PTX check; separate DXGI/Torch device enumeration | 64/64 vector elements; software adapters excluded |
 
 Default backend SHA256: `9e88918e65b81eeb128c69cd7a96ab495b101daf51f6f78f943445d7d4c5f70d`.

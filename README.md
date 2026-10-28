@@ -2,7 +2,7 @@
 
 **RX580 · gfx803 · Windows x64** — ZLUDA, HIP/ROCm, DirectML and OpenVINO, with optional ComfyUI.
 
-[Русский](README.ru.md) · [Download v0.3.1](https://github.com/aktalascloud/polaris-gfx803-rx580-zluda-rocm-hip-comfyui-windows/releases/tag/v0.3.1) · [Patches](docs/PATCHES.md) · [Licenses](THIRD_PARTY_NOTICES.md)
+[Русский](README.ru.md) · [Download v0.3.1](https://github.com/aktalascloud/polaris-gfx803-rx580-zluda-rocm-hip-comfyui-windows/releases/tag/v0.4.0) · [Patches](docs/PATCHES.md) · [Licenses](THIRD_PARTY_NOTICES.md)
 
 ## Install
 
@@ -26,6 +26,15 @@ Requires Windows x64, internet, about 20 GiB setup space and an existing compati
 | `Run-ZLUDA.cmd`, `HIP-Shell.cmd` | Generic application launcher and process-local HIP shell |
 
 Use launchers inside the installed runtime. CUDA/DirectML wrappers accept `-c`, `-m` and script paths. External API nodes are disabled in the ComfyUI preset; no cloud keys are configured.
+
+## Automatic bounded attention
+
+New ComfyUI installs use automatic dispatch, **without another installer switch**.
+Small ordinary FP32 calls retain upstream math; large/masked/FP16 inference uses
+bounded tiles with mask, upcast and output-layout support. On RX580, **146 GPU
+cases passed in two processes**. Warm FP32 `4096×4096` attention: **87.68 → 53.86 ms**,
+with additional tensor peak **1024 → 69 MiB**. Small calls have dispatch overhead;
+this is not a measured full-model or images/s gain. [Results and rollback](docs/ATTENTION.md).
 
 ## Patches and results
 

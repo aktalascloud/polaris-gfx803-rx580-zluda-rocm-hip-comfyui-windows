@@ -50,3 +50,5 @@ of Linux ROCm binaries or a claim of a complete port.
 Published results exclude personal prompts, host paths, serials, profiles, keys,
 authentication files and raw logs. Setup configures no sign-in or stored API key.
 Normal publisher downloads and local application interfaces do not grant cloud access.
+
+The bounded attention adaptation is GPL-3.0-only, inspired by advanced-lvl-up's GPL ComfyUI helper. Attribution/source and the rewritten contract are in [ATTENTION.md](docs/ATTENTION.md). No upstream binary or complete third-party attention module is repackaged.
