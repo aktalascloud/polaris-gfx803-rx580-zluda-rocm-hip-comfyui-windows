@@ -8,6 +8,7 @@ import sys
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 from gpu_devices import adapters
 from hip_runtime import describe, resolve
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'patches'))
 from attention_patch import status as attention_status
 
 parser=argparse.ArgumentParser()

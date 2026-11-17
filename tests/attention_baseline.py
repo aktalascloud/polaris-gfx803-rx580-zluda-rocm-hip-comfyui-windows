@@ -3,7 +3,7 @@
 import ast,hashlib,importlib.util,sys,types
 from pathlib import Path
 import torch
-sys.path.insert(0,str(Path(__file__).resolve().parent.parent/'tools'))
+sys.path.insert(0,str(Path(__file__).resolve().parent.parent/'patches'))
 from attention_patch import HOOK,MARKER,UPSTREAM_SHA256,normalized_digest
 
 def load(folder):

@@ -1,6 +1,6 @@
 Source contribution handoff for aktalascloud/polaris-gfx803-rx580-zluda-rocm-hip-comfyui-windows.
 This source contribution is provided under GPL-3.0-only, matching the target project.
-See COPYING. Third-party runtimes/binaries are not included.
+See ../../LICENSE. Third-party runtimes/binaries are not included.
 
 The native small-GEMM code is a local Windows HIP 5.7 workaround inspired by:
 https://github.com/Schaka/rocm-gfx803/blob/8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78/patches/rocblas/small-gemm-assembly-miscompute.patch

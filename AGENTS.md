@@ -1,17 +1,8 @@
-# Project maintenance
+# Работа с проектом
 
-- This repository contains only public source, reproducible profiles and sanitized numeric measurements.
-- Never commit or upload local runtimes, models, caches, logs, personal paths, credentials or authentication files.
-- Do not change GPU drivers, registry, firmware, TDR or security settings.
-- Do not run generation, GPU tests or new benchmarks unless the human explicitly requests them.
-- Target AMD Polaris / gfx803 / RX580 only. Do not add unmeasured GPU-family profiles.
-- Never invent per-patch gains or universal tokens/s. Numerical correctness checks are not speed measurements.
-- ComfyUI was installed but not launched in the original experiment. No ComfyUI image-generation speed claim is supported.
-- Release archives contain this project's source installer only. Third-party software is downloaded from its publisher.
-- Preserve GPL notices and upstream license/source links. Do not upload the original private portable archive.
-
-- Small-GEMM is opt-in and bounded to tiny FP32 on the tested device/context. Preserve the original backend hash and all original export ordinals.
-- Historical source-machine results and current-machine checks must stay separate. Never promote generated shim, hsaco, import DLLs or raw reports into Git/source archives.
-- Keep Torch DirectML in its separate cp311 environment; DXGI and Torch device indices are not interchangeable.
-
-- Default attention is an automatic bounded dispatcher for pinned ComfyUI. Preserve masks, upcast, layouts, explicit backends and the small stock path; synthetic gains are not full-generation gains.
+- Начните с README.md. Патчи, откат и лицензии — patches/README.md. Замеры — results.json. В нём результаты текущей и исходной машин разделены.
+- Install.cmd запускает tools/Install.ps1. profiles/ хранит закреплённые версии и список файлов архива. launchers/ копируется в корень новой установки. tests/ — ручные проверки.
+- Только Windows / Polaris gfx803 / RX580. Не меняйте драйвер, реестр, TDR, прошивку, настройки безопасности или рабочие установки. Модели, генерация, GPU-тесты и новые замеры требуют явной команды пользователя.
+- Автоматический выбор attention включён для закреплённого ComfyUI. Сохраняйте маски, upcast, формы, явные бэкенды и штатный путь для малых вызовов. Small-GEMM опционален: сохраняйте исходный хеш DLL и ordinals. Torch DirectML изолирован в cp311, его индексы отличаются от DXGI.
+- Публикуйте только исходники и обезличенные результаты. Сохраняйте лицензии и прямые ссылки на источники. Ключи, локальные пути, DLL, HSACO, приватные архивы, логи и кэши остаются вне Git. Временные файлы убирайте после проверки.
+- Для упаковки используйте python -B tools/package_source.py --output <новый ZIP>. Сверьте profiles/source-files.json с git ls-files. Описывайте только проверенное: полная загрузка и генерация ComfyUI не подтверждены, синтетические замеры не равны ускорению модели.

@@ -25,7 +25,7 @@ if(!$WithComfyUI -and !$WithoutComfyUI){
     $WithComfyUI=((Read-Host 'Also install ComfyUI and its desktop shortcut? [Y/n]') -notmatch '^(n|no)$')
 }
 if(!$AcceptThirdPartyLicenses){
-    Write-Host 'Read THIRD_PARTY_NOTICES.md and the linked vendor terms before downloading.'
+    Write-Host 'Read patches/README.md (Licenses) and the linked vendor terms before downloading.'
     Write-Host 'No model or third-party executable is distributed in this installer archive.'
     if((Read-Host 'Accept the applicable third-party terms and continue? [yes/NO]') -ne 'yes'){throw 'Cancelled before download'}
 }
@@ -104,9 +104,9 @@ foreach($environment in @($cuda,$onnx)){
 }
 $cudaPython=Join-Path $cuda 'python.exe'
 $onnxPython=Join-Path $onnx 'python.exe'
-$cudaRequirements=Join-Path $source 'requirements\cuda-py312.txt'
-$installRequirements=if($WithComfyUI){Join-Path $source 'requirements\comfy-py312.txt'}else{$cudaRequirements}
-$onnxRequirements=Join-Path $source 'requirements\onnx-py312.txt'
+$cudaRequirements=Join-Path $source 'profiles\cuda-py312.txt'
+$installRequirements=if($WithComfyUI){Join-Path $source 'profiles\comfy-py312.txt'}else{$cudaRequirements}
+$onnxRequirements=Join-Path $source 'profiles\onnx-py312.txt'
 $torchWheel=Fetch 'torch' 'torch-2.2.1+cu118-cp312-cp312-win_amd64.whl'
 CheckedRun $cudaPython @('-I','-m','pip','--isolated','install','--no-cache-dir','--disable-pip-version-check','-c',$cudaRequirements,$torchWheel,'torchvision==0.17.1+cu118','torchaudio==2.2.1+cu118','--index-url','https://download.pytorch.org/whl/cu118','--extra-index-url','https://pypi.org/simple')
 CheckedRun $cudaPython @('-I','-m','pip','--isolated','install','--no-cache-dir','--only-binary=:all:','--disable-pip-version-check','-r',$installRequirements,'--index-url','https://pypi.org/simple')
@@ -125,7 +125,7 @@ if($WithTorchDirectML){
     $dmlVision=Fetch 'torch_dml_vision' 'torchvision-0.19.1+cpu-cp311-cp311-win_amd64.whl'
     $dmlProvider=Fetch 'torch_dml' 'torch_directml-0.2.5.dev240914-cp311-cp311-win_amd64.whl'
     CheckedRun $dmlPython @('-I','-m','pip','--isolated','install','--no-deps','--no-cache-dir',$dmlTorch,$dmlVision,$dmlProvider)
-    CheckedRun $dmlPython @('-I','-m','pip','--isolated','install','--no-cache-dir','--require-hashes','-r',(Join-Path $source 'requirements\torch-directml-py311.txt'),'--index-url','https://pypi.org/simple')
+    CheckedRun $dmlPython @('-I','-m','pip','--isolated','install','--no-cache-dir','--require-hashes','-r',(Join-Path $source 'profiles\torch-directml-py311.txt'),'--index-url','https://pypi.org/simple')
 }
 $apps=Join-Path $root 'apps'
 New-Item -ItemType Directory -Path $apps -Force | Out-Null
@@ -138,7 +138,7 @@ $comfy=Join-Path $apps 'ComfyUI'
 Move-Item -LiteralPath $sourceDirectory.FullName -Destination $comfy
 CheckedRun $cudaPython @('-I',(Join-Path $source 'tools\prepare.py'),'patch-comfy',$comfy,(Join-Path $source 'patches\comfy-offline-startup.diff'))
 CheckedRun $cudaPython @('-I',(Join-Path $source 'tools\prepare.py'),'prune-comfy',$comfy)
-CheckedRun $cudaPython @('-I',(Join-Path $source 'tools\attention_patch.py'),'install',$comfy)
+CheckedRun $cudaPython @('-I',(Join-Path $source 'patches\attention_patch.py'),'install',$comfy)
 }
 if($Backend -eq 'AMD'){
     $sevenzip=Get-Command '7z.exe' -ErrorAction SilentlyContinue
@@ -197,9 +197,9 @@ if($Backend -eq 'AMD'){
 }
 Copy-Item -LiteralPath (Join-Path $source 'tools') -Destination (Join-Path $root 'tools') -Recurse
 Copy-Item -LiteralPath (Join-Path $source 'patches') -Destination (Join-Path $root 'patches') -Recurse
-foreach($name in @('Python-CUDA.cmd','Python-ONNX.cmd','Run-ZLUDA.cmd','HIP-Shell.cmd','Check-Zluda.cmd')){Copy-Item -LiteralPath (Join-Path $source $name) -Destination (Join-Path $root $name)}
-if($WithTorchDirectML){Copy-Item -LiteralPath (Join-Path $source 'Python-DirectML.cmd') -Destination $root}
-$profile=@{backend=$Backend;version='0.4.1';comfy_installed=[bool]$WithComfyUI;attention_default=[bool]$WithComfyUI;torch_directml_installed=[bool]$WithTorchDirectML;architecture='Polaris/gfx803';comfy_commit='c0c011dca91b595091a4b032770da366fc90fb2b';models_included=$false;dxgi_device_id=$device.dxgi_index}
+foreach($name in @('Python-CUDA.cmd','Python-ONNX.cmd','Run-ZLUDA.cmd','HIP-Shell.cmd','Check-Zluda.cmd')){Copy-Item -LiteralPath (Join-Path $source ('launchers\'+$name)) -Destination (Join-Path $root $name)}
+if($WithTorchDirectML){Copy-Item -LiteralPath (Join-Path $source 'launchers\Python-DirectML.cmd') -Destination $root}
+$profile=@{backend=$Backend;version='0.4.2';comfy_installed=[bool]$WithComfyUI;attention_default=[bool]$WithComfyUI;torch_directml_installed=[bool]$WithTorchDirectML;architecture='Polaris/gfx803';comfy_commit='c0c011dca91b595091a4b032770da366fc90fb2b';models_included=$false;dxgi_device_id=$device.dxgi_index}
 $profile.original_nvrtc_sha256=$originalNvrtcHash
 if($HipRuntime){$profile.hip_runtime=(Resolve-Path -LiteralPath $HipRuntime).ProviderPath}
 $profile | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $root 'profile.json') -Encoding UTF8
@@ -208,11 +208,11 @@ CheckedRun $probePython @('-I',(Join-Path $source 'tools\hip_runtime.py'),'--roo
 if($WithSmallGemmPatch){
     $build=Join-Path $source ('work\small-gemm-'+[guid]::NewGuid().ToString('N'))
     & (Join-Path $source 'patches\small-gemm\Build-SmallGemm.ps1') -HipRoot (Join-Path $root 'hip') -BackendDll (Join-Path $root 'hip\bin\rocblas.dll') -Python $probePython -OutDir $build
-    & (Join-Path $source 'tools\Small-Gemm.ps1') -RuntimeRoot $root -BuildDirectory $build
+    & (Join-Path $source 'patches\small-gemm\Small-Gemm.ps1') -RuntimeRoot $root -BuildDirectory $build
 }
 New-Item -ItemType Directory -Path (Join-Path $root 'models'),(Join-Path $root 'temp') -Force | Out-Null
 if($WithComfyUI){
-    Copy-Item -LiteralPath (Join-Path $source 'Start-ComfyUI.cmd') -Destination $root
+    Copy-Item -LiteralPath (Join-Path $source 'launchers\Start-ComfyUI.cmd') -Destination $root
     if(!$NoDesktopShortcut){
         $desktop=[Environment]::GetFolderPath('DesktopDirectory')
         if(!$desktop){throw 'Windows did not provide a desktop folder; use -NoDesktopShortcut'}

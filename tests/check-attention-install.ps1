@@ -21,12 +21,12 @@ $info=Get-Content -LiteralPath $receipt -Raw | ConvertFrom-Json
 if(!$info.enabled){throw 'Default attention hook missing'}
 $module=Join-Path $comfy 'comfy\ldm\modules\attention.py'
 $before=(Get-FileHash -LiteralPath $module).Hash
-CheckedRun $Python @('-I',(Join-Path $source 'tools\attention_patch.py'),'install',$comfy)
+CheckedRun $Python @('-I',(Join-Path $source 'patches\attention_patch.py'),'install',$comfy)
 if((Get-FileHash -LiteralPath $module).Hash -ne $before){throw 'Repeated apply changed the hook'}
-CheckedRun $Python @('-I',(Join-Path $source 'tools\attention_patch.py'),'rollback',$comfy)
+CheckedRun $Python @('-I',(Join-Path $source 'patches\attention_patch.py'),'rollback',$comfy)
 $disabled=Get-Content -LiteralPath $receipt -Raw | ConvertFrom-Json
 if($disabled.enabled){throw 'Rollback did not disable the hook'}
-CheckedRun $Python @('-I',(Join-Path $source 'tools\attention_patch.py'),'install',$comfy)
+CheckedRun $Python @('-I',(Join-Path $source 'patches\attention_patch.py'),'install',$comfy)
 if((Get-FileHash -LiteralPath $module).Hash -ne $before){throw 'Reapply changed the hook'}
 $result=@{actual_installer_comfy_block=$true;default_enabled=$true;idempotent=$true;rollback_verified=$true;reapply_verified=$true;models_used=$false;gpu_workload_run=$false;scope='ComfyUI source installation block only; full dependency/bootstrap installer not repeated'}
 $result | ConvertTo-Json | Set-Content -LiteralPath $Report -Encoding UTF8

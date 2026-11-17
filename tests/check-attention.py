@@ -9,7 +9,7 @@ parser.add_argument('--implementation',choices=['tiled','default'],default='tile
 parser.add_argument('--comfy-root');parser.add_argument('--benchmark',action='store_true')
 parser.add_argument('--report',required=True)
 args=parser.parse_args()
-root=Path(__file__).resolve().parent.parent;sys.path.insert(0,str(root/'tools'))
+root=Path(__file__).resolve().parent.parent;sys.path[:0] = [str(root / 'tools'), str(root / 'patches')]
 report_path=Path(args.report).resolve();report_path.parent.mkdir(parents=True,exist_ok=True)
 report_path.write_text(json.dumps({'passed':False,'status':'running','models_used':False}),encoding='utf-8')
 handles=[]
