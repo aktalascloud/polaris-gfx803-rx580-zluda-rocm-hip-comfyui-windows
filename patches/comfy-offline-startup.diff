@@ -62,3 +62,16 @@ index 17771ee..47db49e 100644
 -pause
 +call "%~dp0Start-ComfyUI.cmd" %*
 +exit /b %ERRORLEVEL%
+diff --git a/utils/extra_config.py b/utils/extra_config.py
+--- a/utils/extra_config.py
++++ b/utils/extra_config.py
+@@ -6,6 +6,9 @@
+ def load_extra_path_config(yaml_path):
+     with open(yaml_path, 'r', encoding='utf-8') as stream:
+         config = yaml.safe_load(stream)
++    if config is None:
++        logging.warning("Extra model paths config contains no mappings: %s", yaml_path)
++        return
+     yaml_dir = os.path.dirname(os.path.abspath(yaml_path))
+     for c in config:
+         conf = config[c]

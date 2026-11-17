@@ -19,14 +19,14 @@ def unzip(source,destination):
         archive.extractall(destination)
 
 def patch_comfy(root,patch):
-    # The distributed GPL patch is restricted to these two upstream files.
+    # Restrict the distributed GPL patch to the reviewed upstream files.
     lines=Path(patch).read_text(encoding='utf-8-sig').splitlines()
     position=0
     while position<len(lines):
         if not lines[position].startswith('+++ b/'):
             position+=1;continue
         name=lines[position][6:]
-        if name not in {'comfy/zluda.py','comfyui.bat'}:raise ValueError('Unexpected patched file')
+        if name not in {'comfy/zluda.py','comfyui.bat','utils/extra_config.py'}:raise ValueError('Unexpected patched file')
         path=under(root,name)
         original=path.read_text(encoding='utf-8-sig').splitlines()
         result=[]; consumed=0; position+=1
