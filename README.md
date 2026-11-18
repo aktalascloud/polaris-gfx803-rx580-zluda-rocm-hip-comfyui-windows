@@ -1,8 +1,20 @@
-# Polaris AI Toolkit
+# Polaris AI Toolkit · RX 580 on Windows
 
-RX580 / gfx803 · Windows x64 · ZLUDA, HIP/ROCm, DirectML, OpenVINO and optional ComfyUI.
+[Русский](#русский) · [Release / Скачать](https://github.com/aktalascloud/polaris-gfx803-rx580-zluda-rocm-hip-comfyui-windows/releases/tag/v0.4.3) · [Guide / Документация](#установка--setup) · [Evidence / Данные](https://github.com/aktalascloud/polaris-gfx803-rx580-zluda-rocm-hip-comfyui-windows/blob/1199364f36e2f855f6e4eda3fffc41fd68e70a5a/results.json)
 
-[Download v0.4.3](https://github.com/aktalascloud/polaris-gfx803-rx580-zluda-rocm-hip-comfyui-windows/releases/tag/v0.4.3) · [Patches, rollback and licenses](patches/README.md) · [Numeric results](results.json)
+Install a pinned AI stack for AMD Polaris / gfx803 using ZLUDA, HIP/ROCm and rocBLAS, with alternate DirectML and OpenVINO CPU backends. ComfyUI is optional. Setup uses the existing compatible AMD driver.
+
+**Quick start.** Download the release source ZIP, extract it to a short writable ASCII path and run `Install.cmd`. The installer fetches pinned dependencies from their publishers.
+
+**Evidence.** Earlier RX 580 synthetic FP32 4096×4096 attention runs measured 87.68 → 53.86 ms and 1,024 → 69 MiB in additional peak tensor allocations. The Small-GEMM v0.4.3 prerelease verified the gfx803 build and all 3,936 export ordinals. The speed figures refer to the earlier attention experiment.
+
+## Русский
+
+Установщик закреплённого AI-стека для AMD Polaris / gfx803. В комплекте ZLUDA, HIP/ROCm и rocBLAS, а также DirectML и OpenVINO CPU. ComfyUI подключается по выбору. Используется установленный совместимый драйвер AMD.
+
+**Запуск.** Скачайте ZIP с исходниками, распакуйте его в короткий доступный для записи путь ASCII и запустите `Install.cmd`. Установщик скачает закреплённые зависимости у их издателей.
+
+**Проверка.** В более раннем синтетическом тесте FP32 attention 4096×4096 на RX 580 получено 87,68 → 53,86 мс и 1 024 → 69 МиБ дополнительных пиковых выделений тензоров. В v0.4.3 проверены сборка gfx803 и все 3 936 экспортных ординалов Small-GEMM. Замер скорости относится к прежнему тесту attention.
 
 ## Установка / Setup
 
@@ -36,3 +48,5 @@ Setup requires Windows x64, an existing compatible AMD driver, internet and abou
 Замеры относятся к указанным операциям. Полный запуск ComfyUI, генерация и её скорость не проверены. [Методика, ограничения и откат](patches/README.md).
 
 The recorded figures cover individual operations. Full ComfyUI startup and generation remain unverified. Project source is [GPL-3.0-only](LICENSE).
+
+[All projects / Все проекты](https://github.com/aktalascloud)
