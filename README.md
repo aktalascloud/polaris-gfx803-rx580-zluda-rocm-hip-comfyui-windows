@@ -2,7 +2,7 @@
 
 RX580 / gfx803 · Windows x64 · ZLUDA, HIP/ROCm, DirectML, OpenVINO and optional ComfyUI.
 
-[Download v0.4.2](https://github.com/aktalascloud/polaris-gfx803-rx580-zluda-rocm-hip-comfyui-windows/releases/tag/v0.4.2) · [Patches, rollback and licenses](patches/README.md) · [Numeric results](results.json)
+[Download v0.4.3](https://github.com/aktalascloud/polaris-gfx803-rx580-zluda-rocm-hip-comfyui-windows/releases/tag/v0.4.3) · [Patches, rollback and licenses](patches/README.md) · [Numeric results](results.json)
 
 ## Установка / Setup
 

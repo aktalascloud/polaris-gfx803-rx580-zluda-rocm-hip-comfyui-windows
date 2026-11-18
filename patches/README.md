@@ -43,6 +43,8 @@ Tiny FP32 (M,N,K from 1 to 8), host alpha/beta, Polaris device 0 and initial HIP
 
 Close consumers before apply/rollback. Build against the trusted original backend. Use rocblas_backend.dll if already patched or rocblas.dll from an unpatched matched runtime. The generated kernel32 import stub is a build-only artifact.
 
+Small-GEMM builds the gfx803 kernel at `-O3` with `-fno-fast-math`. The x64 shim uses `-O3 -mtune=haswell` and full LTO at level 3. Haswell scheduling tunes for Xeon E5 v3 while keeping the baseline x64 instruction set. The HIP 5.7.1 build and all original export ordinals were verified with these flags. The new build has no GPU timings or numerical results.
+
 ~~~powershell
 $build = 'C:\AI\Polaris-Build'
 powershell -NoProfile -ExecutionPolicy Bypass -File patches\small-gemm\Build-SmallGemm.ps1 -HipRoot "$runtime\hip" -BackendDll "$runtime\hip\bin\rocblas_backend.dll" -Python "$runtime\envs\diagnostics\python.exe" -OutDir $build
