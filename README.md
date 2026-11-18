@@ -1,6 +1,6 @@
 # Polaris AI Toolkit · RX 580 on Windows
 
-[Русский](#русский) · [Release / Скачать](https://github.com/aktalascloud/polaris-gfx803-rx580-zluda-rocm-hip-comfyui-windows/releases/tag/v0.4.3) · [Guide / Документация](#установка--setup) · [Evidence / Данные](https://github.com/aktalascloud/polaris-gfx803-rx580-zluda-rocm-hip-comfyui-windows/blob/1199364f36e2f855f6e4eda3fffc41fd68e70a5a/results.json)
+[Русский](#русский) · [Release / Скачать](https://github.com/aktalascloud/polaris-gfx803-rx580-zluda-rocm-hip-comfyui-windows/releases/tag/v0.4.3) · [Guide / Документация](#установка--setup) · [Evidence / Данные](tests/results.json) · [Patches and licenses](patches/README.md)
 
 Install a pinned AI stack for AMD Polaris / gfx803 using ZLUDA, HIP/ROCm and rocBLAS, with alternate DirectML and OpenVINO CPU backends. ComfyUI is optional. Setup uses the existing compatible AMD driver.
 
@@ -18,7 +18,7 @@ Install a pinned AI stack for AMD Polaris / gfx803 using ZLUDA, HIP/ROCm and roc
 
 ## Установка / Setup
 
-Распакуйте ZIP в короткий ASCII-путь и запустите **Install.cmd**. Выберите ComfyUI (Enter — да) и подтвердите условия компонентов. Для установки с параметрами откройте PowerShell в папке распакованного ZIP.
+Распакуйте ZIP в короткий ASCII-путь, запустите **Install.cmd**, выберите ComfyUI (Enter — да) и подтвердите условия компонентов.
 
 Extract the ZIP to a short writable ASCII path and run **Install.cmd**. Choose ComfyUI (Enter defaults to yes) and accept the dependency terms.
 
@@ -26,9 +26,9 @@ Extract the ZIP to a short writable ASCII path and run **Install.cmd**. Choose C
 .\Install.cmd -InstallRoot C:\AI\Polaris-New -WithComfyUI -WithTorchDirectML -WithSmallGemmPatch
 ~~~
 
-Нужны Windows x64, совместимый установленный драйвер AMD, интернет и около 20 ГиБ. Установщик скачивает закреплённые зависимости, не перезаписывает существующую папку и не меняет драйвер. Модели скачиваются отдельно с [Hugging Face](https://huggingface.co/models). В исходном архиве код и обезличенные замеры.
+Нужны Windows x64, совместимый драйвер AMD, интернет и около 20 ГиБ. Установка скачивает закреплённые зависимости в новую папку. [Модели](https://huggingface.co/models) скачиваются отдельно.
 
-Setup requires Windows x64, an existing compatible AMD driver, internet and about 20 GiB. It fetches pinned dependencies and refuses existing destinations. Models are separate downloads. The source ZIP contains project code and sanitized measurements.
+Setup needs Windows x64, an existing compatible AMD driver, internet and about 20 GiB. It fetches pinned dependencies into a new folder. Download models separately.
 
 | Installed command | Назначение / Purpose |
 |---|---|
@@ -42,11 +42,21 @@ Setup requires Windows x64, an existing compatible AMD driver, internet and abou
 ## RX580 results
 
 - **Attention** · 146 synthetic GPU cases passed in each of two processes. FP32 4096×4096 attention: 87.68 → 53.86 ms (−38.6%), additional peak tensor allocations 1024 → 69 MiB.
-- **Small-GEMM** · opt-in tiny FP32 correctness fix. Strided baseline 63/69. Patched 69/69 on each of four APIs.
+- **Small-GEMM** · opt-in tiny FP32 correctness fix. Strided baseline 63/69; the validated patch build passed 69/69 on each of four APIs. The v0.4.3 compiler flags were checked at build time; no new GPU results.
 - **Backends** · CUDA vector addition 64/64. Torch and strict ONNX DirectML passed. OpenVINO CPU passed, OpenVINO GPU returned incorrect zeros.
 
-Замеры относятся к указанным операциям. Полный запуск ComfyUI, генерация и её скорость не проверены. [Методика, ограничения и откат](patches/README.md).
+Полный запуск и генерация ComfyUI не проверены. / Full ComfyUI startup and generation remain unverified.
 
-The recorded figures cover individual operations. Full ComfyUI startup and generation remain unverified. Project source is [GPL-3.0-only](LICENSE).
+## Структура / Source layout
+
+| Path | Назначение / Purpose |
+|---|---|
+| [tools/](tools/) | Installer, runtime helpers, source packaging |
+| [profiles/](profiles/) | Pinned downloads, Python requirements, source ZIP allowlist |
+| [launchers/](launchers/) | Commands copied to the installed runtime |
+| [patches/](patches/) | ComfyUI and Small-GEMM changes, rollback and licenses |
+| [tests/](tests/) | Checks, reproduction scripts and recorded results |
+
+Local development and verification: [AGENTS.md](AGENTS.md). Source license: [GPL-3.0-only](LICENSE).
 
 [All projects / Все проекты](https://github.com/aktalascloud)

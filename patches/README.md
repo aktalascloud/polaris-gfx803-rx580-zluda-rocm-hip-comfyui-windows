@@ -56,10 +56,10 @@ Rollback restores the original DLL hash and disables the receipt. The original D
 
 ## Recorded validation
 
-[Sanitized numeric evidence](../results.json) keeps attention, blob trials, current-machine Small-GEMM and source-machine Small-GEMM under separate keys. Reproduction scripts are in tests/. GPU checks and benchmarks require explicit authorization.
+[Numeric evidence](../tests/results.json) and [reproduction scripts](../tests/) are grouped in `tests/`. The JSON separates attention, blob trials, and Small-GEMM results from the two machines. GPU checks and benchmarks require explicit authorization.
 
 - Attention used an independent CPU FP64 reference. 53 CPU cases, 146 GPU cases per process (two processes), four guards and seven selector checks passed. The 4096×4096 result uses 18 alternating warm samples per algorithm. Smaller stock calls have minor dispatch overhead. Tensor allocation peaks are additional PyTorch allocations, excluding existing inputs, weights, reserved cache and driver memory.
-- Small-GEMM passed 69/69 per API (max error 3.34e-6), export checks, rollback and reapply. CUDA/PTX, DirectML and OpenVINO CPU checks also passed on the reference machine. Other runtimes, real multi-GPU, concurrent native calls, complete context reset and native Unicode paths remain unverified.
+- The October Small-GEMM build passed 69/69 per API (max error 3.34e-6), export checks, rollback and reapply. CUDA/PTX, DirectML and OpenVINO CPU checks also passed on the reference machine. Other runtimes, real multi-GPU, concurrent native calls, complete context reset and native Unicode paths remain unverified.
 - The matched rocBLAS baseline passed both eight-case runs. Optic failed on repeat and at batch 512, vega failed before its first result, and mixed DLL/kernel pairs failed. On the controlled app fixture (24 layers, batch -1), baseline ZLUDA reached 8.25 tokens/s, optic 8.10 and Vulkan 9.58. The separately tuned Vulkan setup reached 33.09 tokens/s with different offload and batch settings. These are fixture-level comparisons. No full-model attention, generation, training or universal speed claim is supported.
 
 ## Upstream review — 2026-11-17
