@@ -7,6 +7,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parent))
 from gpu_runtime import ROOT,torch_profile
 torch_profile()
 folder=ROOT/'apps'/'ComfyUI'
+folder.joinpath('user').mkdir(exist_ok=True)
 os.chdir(folder)
 sys.path.insert(0,str(folder))
 sys.argv=[str(folder/'main.py')]+sys.argv[1:]

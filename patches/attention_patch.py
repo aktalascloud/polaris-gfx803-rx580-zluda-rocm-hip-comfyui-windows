@@ -10,7 +10,7 @@ import json
 from pathlib import Path
 import stat
 
-UPSTREAM_SHA256 = 'fae9969a9c80cae3a359af6032a5d77497836199df66fce46e22df89cd4a6cdc'
+UPSTREAM_SHA256 = '3f3eca8146b0e7051693149ac91f29ddf94a620ab8525797879d0834e1853f50'
 MARKER = '\n# POLARIS_BOUNDED_ATTENTION_V1\n'
 HOOK = '''from .polaris_attention import attention as _polaris_tiled_attention
 _polaris_upstream_sub_quad = attention_sub_quad
@@ -65,6 +65,8 @@ if optimized_attention is _polaris_upstream_sub_quad:
     optimized_attention = attention_sub_quad
 if optimized_attention_masked is _polaris_upstream_sub_quad:
     optimized_attention_masked = attention_sub_quad
+if REGISTERED_ATTENTION_FUNCTIONS.get("sub_quad") is _polaris_upstream_sub_quad:
+    REGISTERED_ATTENTION_FUNCTIONS["sub_quad"] = attention_sub_quad
 '''
 
 

@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 """No GPU initialization; exercise adapter namespaces and runtime rejection."""
 import json
+import hashlib
 import os
 from pathlib import Path
 import struct
@@ -11,6 +12,7 @@ from unittest.mock import patch
 sys.path.insert(0,str(Path(__file__).resolve().parent.parent/'tools'))
 from gpu_devices import radeon, torch_radeon
 from hip_runtime import resolve, validate
+from gpu_runtime import verify_rocblas
 
 
 class SelectionTests(unittest.TestCase):
@@ -55,6 +57,22 @@ class SelectionTests(unittest.TestCase):
             with patch.dict(os.environ,{'AI_HIP_RUNTIME':str(root/'environment'/'amdhip64.dll')}):
                 with self.assertRaises(FileNotFoundError) as raised:resolve(root)
                 self.assertIn('environment',str(raised.exception))
+
+    def test_rocblas_rejects_replaced_kernel_with_matching_dll(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder)
+            library=root/'rocblas'/'library'
+            library.mkdir(parents=True)
+            (root/'rocblas.dll').write_bytes(b'baseline')
+            kernel=library/'gfx803.hsaco'
+            kernel.write_bytes(b'matched')
+            dll_hash=hashlib.sha256(b'baseline').hexdigest()
+            library_hash=hashlib.sha256(b'gfx803.hsaco\0'+hashlib.sha256(b'matched').digest()).hexdigest()
+            with patch('gpu_runtime.ROCBLAS_DLL_SHA256',dll_hash), patch('gpu_runtime.ROCBLAS_LIBRARY_SHA256',library_hash):
+                self.assertFalse(verify_rocblas(root))
+                kernel.write_bytes(b'mismatched')
+                with self.assertRaisesRegex(ValueError, 'library does not match'):
+                    verify_rocblas(root)
 
 
 if __name__=='__main__':unittest.main()

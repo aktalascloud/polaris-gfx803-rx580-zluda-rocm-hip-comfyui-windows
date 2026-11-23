@@ -29,7 +29,7 @@ if($backend -eq 'AMD'){
 if($App -eq 'Comfy'){
     if(!(Test-Path -LiteralPath (Join-Path $root 'apps\ComfyUI\main.py'))){throw 'ComfyUI was not selected during installation. Run Install.cmd -WithComfyUI with a fresh destination.'}
     if(!$Port){$Port=8188}
-    $arguments=@('-I',(Join-Path $PSScriptRoot 'run_comfy.py'),'--listen','127.0.0.1','--port',"$Port",'--auto-launch','--force-fp32','--cpu-vae','--lowvram','--reserve-vram','0.9','--use-quad-cross-attention','--force-upcast-attention','--disable-cuda-malloc','--disable-xformers','--disable-api-nodes')
+    $arguments=@('-B','-I',(Join-Path $PSScriptRoot 'run_comfy.py'),'--listen','127.0.0.1','--port',"$Port",'--auto-launch','--force-fp32','--cpu-vae','--lowvram','--reserve-vram','0.9','--use-quad-cross-attention','--force-upcast-attention','--disable-cuda-malloc','--disable-xformers','--disable-async-offload','--disable-pinned-memory','--disable-api-nodes')
 } else {
     $arguments=@('-I',(Join-Path $PSScriptRoot 'run_python.py'))
 }

@@ -1,6 +1,10 @@
 @echo off
-setlocal
+setlocal DisableDelayedExpansion
 if not exist "%~dp0profile.json" exit /b 1
+if /i "%~1"=="--torch" (
+    call "%~dp0Python-CUDA.cmd" "%~dp0tools\check_torch.py"
+    exit /b
+)
 set "HIP_PATH=%~dp0hip"
 set "ROCBLAS_TENSILE_LIBPATH=%~dp0hip\bin\rocblas\library"
 set "PATH=%~dp0hip\bin;%~dp0zluda;%PATH%"

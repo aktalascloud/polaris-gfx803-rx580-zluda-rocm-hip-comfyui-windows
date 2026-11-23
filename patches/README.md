@@ -2,14 +2,14 @@
 
 ## Default Windows profile
 
-Install.cmd invokes tools/Install.ps1. It stages dependencies from profiles/, copies launchers/ to the runtime root and applies the patches below. With ComfyUI selected, it adds a desktop shortcut unless -NoDesktopShortcut is set. The runtime uses local HIP/DLL paths, preserves original NVRTC, disables external ComfyUI API nodes and uses low VRAM, FP32 and CPU VAE. The pinned snapshot lacks Z-Image support.
+Install.cmd invokes tools/Install.ps1. It stages dependencies from profiles/, copies launchers/ to the runtime root and applies the patches below. With ComfyUI selected, it adds a desktop shortcut unless -NoDesktopShortcut is set. The runtime uses local HIP/DLL paths, preserves original NVRTC, disables external ComfyUI API nodes and uses low VRAM, FP32 and CPU VAE. ComfyUI 0.13.0 includes the Z-Image implementation. MOSS-Image requires a newer ComfyUI and Torch stack.
 
 | Component | Change |
 |---|---|
-| HIP 5.7.1 / ZLUDA 3.9.5 | SDK-only extraction and pinned upstream ROCm5 build |
+| HIP 5.7.1 / ZLUDA 3.9.6 | SDK-only extraction and pinned upstream ROCm5 build |
 | rocBLAS | Matched advanced-lvl-up DLL and gfx803 kernels. SHA-256 of the DLL is 9e88918e65b81eeb128c69cd7a96ab495b101daf51f6f78f943445d7d4c5f70d |
 | PyTorch | ZLUDA cublas, cusparse and NVRTC aliases, with original NVRTC preserved |
-| ComfyUI | [Offline startup and empty YAML fix](comfy-offline-startup.diff). [Pinned download hashes](../profiles/components.json) |
+| ComfyUI 0.13.0 | [Torch 2.2 compatibility and empty YAML fix](comfy-offline-startup.diff). [Pinned download hashes](../profiles/components.json) |
 | Attention | [Hash-guarded installer](attention_patch.py) and [tiled implementation](polaris_attention.py), enabled automatically for optional ComfyUI |
 | Small-GEMM | [Windows HIP shim and kernel](small-gemm/), enabled by -WithSmallGemmPatch |
 
@@ -21,7 +21,16 @@ Python-CUDA and Check-Zluda select an explicit HIP runtime or AI_HIP_RUNTIME, th
 $runtime = 'C:\AI\Polaris-New'
 & "$runtime\envs\diagnostics\python.exe" -B -I "$runtime\tools\diagnose.py"
 & "$runtime\Check-Zluda.cmd"  # manual GPU check
+& "$runtime\Check-Zluda.cmd" --torch  # PyTorch kernel and FP32/FP16 rocBLAS reference check
 ~~~
+
+## Issue #2 — kernel launch and GEMM
+
+[The report](https://github.com/aktalascloud/polaris-gfx803-rx580-zluda-rocm-hip-comfyui-windows/issues/2) observed kernel launch errors with Torch 2.4.1 and 2.7.0 on ZLUDA 3.9.5, and incorrect GEMM with a different rocBLAS library. A successful device allocation cannot validate either operation.
+
+On November 23, the matched advanced-lvl-up DLL and 159 library files passed the CUDA/PTX, elementwise/reduction, and 256×256 GEMM checks with Torch 2.2.1+cu118 on both ZLUDA 3.9.5 and 3.9.6 ROCm5. The PyTorch launcher checks the pinned Torch version and both rocBLAS parts before importing Torch. Restore the whole matched bundle if either part differs. The check also verifies the optional Small-GEMM artifacts against their receipt.
+
+ComfyUI 0.13.0 uses guarded unsigned dtypes and a fallback for the Torch compiler state query. This profile uses the existing eager code paths for standard models. Comfy Kitchen FP8/FP4 requires newer Torch. Use trusted model weights, especially for pickle-based checkpoints; `weights_only` in Torch 2.2.1 is affected by [CVE-2025-32434](https://github.com/advisories/ghsa-53q9-r3pm-6pq6).
 
 ## Attention
 
@@ -83,12 +92,12 @@ replaced by the project's GPL license.
 | Component | Terms / source |
 |---|---|
 | Python 3.12.10 / 3.11.9 | [Python license](https://docs.python.org/3/license.html), [distributions](https://www.python.org/ftp/python/) |
-| pip 25.2 | [MIT and bundled dependency notices](https://github.com/pypa/pip/blob/25.2/LICENSE.txt) |
+| pip 26.3 | [MIT and bundled dependency notices](https://github.com/pypa/pip/blob/26.3/LICENSE.txt) |
 | Torch 2.2.1 / 2.4.1 | [Project license](https://github.com/pytorch/pytorch/blob/v2.2.1/LICENSE); bundled vendor terms also apply |
 | torchvision / torchaudio | [Vision source](https://github.com/pytorch/vision/tree/v0.17.1), [audio source](https://github.com/pytorch/audio/tree/v2.2.1), respective BSD-style notices |
 | CUDA / NVRTC / cuDNN | [CUDA 11.8 EULA](https://docs.nvidia.com/cuda/archive/11.8.0/eula/index.html) and applicable component terms |
-| ComfyUI-Zluda | [Pinned GPL source](https://github.com/patientx/ComfyUI-Zluda/tree/c0c011dca91b595091a4b032770da366fc90fb2b) |
-| ZLUDA fork | [Pinned MIT / Apache-2.0 source](https://github.com/lshqqytiger/ZLUDA/tree/5e717459179dc272b7d7d23391f0fad66c7459cf) |
+| ComfyUI | [Pinned GPL source](https://github.com/Comfy-Org/ComfyUI/tree/e1add563f9e89026e8c4e8825a2b279fbd67d23a) |
+| ZLUDA fork | [Pinned MIT / Apache-2.0 source](https://github.com/lshqqytiger/ZLUDA/tree/854c58e1565c3597e17046d7cc2b1eab96fcdf55) |
 | Patched gfx803 rocBLAS | [Publisher/source release](https://github.com/advanced-lvl-up/Rx470-Vega10-Rx580-gfx803-gfx900-fix-AMD-GPU/releases/tag/v1.0.0), [upstream rocBLAS license](https://github.com/ROCm/rocBLAS/blob/rocm-5.7.1/LICENSE.md); patch binary is not mirrored |
 | HIP SDK 5.7.1 | [AMD terms](https://www.amd.com/en/developer/resources/rocm-hub/eula/licenses.html), [SDK page](https://www.amd.com/en/developer/resources/rocm-hub/hip-sdk.html) |
 | 7-Zip | [License: LGPL and applicable unRAR restrictions](https://www.7-zip.org/license.txt), [source/downloads](https://www.7-zip.org/download.html) |

@@ -1,5 +1,5 @@
 @echo off
-setlocal
+setlocal DisableDelayedExpansion
 if not exist "%~dp0profile.json" (
   echo Use the launcher inside the installed runtime folder. Run Install.cmd first.
   exit /b 1
@@ -15,5 +15,5 @@ if errorlevel 1 (
 )
 set "HIP_PATH=%~dp0hip"
 set "PATH=%~dp0hip\bin;%~dp0zluda;%PATH%"
-"%~dp0zluda\zluda.exe" -- "%~dp0envs\cuda\python.exe" -I "%~dp0tools\run_python.py" %*
+"%~dp0zluda\zluda.exe" -- "%~dp0envs\cuda\python.exe" -B -I "%~dp0tools\run_python.py" %*
 exit /b %ERRORLEVEL%

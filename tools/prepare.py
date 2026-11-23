@@ -26,7 +26,8 @@ def patch_comfy(root,patch):
         if not lines[position].startswith('+++ b/'):
             position+=1;continue
         name=lines[position][6:]
-        if name not in {'comfy/zluda.py','comfyui.bat','utils/extra_config.py'}:raise ValueError('Unexpected patched file')
+        if name not in {'comfy/model_management.py','comfy/ops.py','comfy/quant_ops.py','comfy/utils.py','utils/extra_config.py'}:
+            raise ValueError('Unexpected patched file')
         path=under(root,name)
         original=path.read_text(encoding='utf-8-sig').splitlines()
         result=[]; consumed=0; position+=1
@@ -44,7 +45,9 @@ def patch_comfy(root,patch):
                 position+=1
         result.extend(original[consumed:])
         path.write_text('\n'.join(result)+'\n',encoding='utf-8')
-    (Path(root)/'Start-ComfyUI.cmd').write_text('@echo off\ncall "%~dp0..\\..\\Start-ComfyUI.cmd" %*\n',encoding='ascii')
+    (Path(root)/'Start-ComfyUI.cmd').write_text(
+        '@echo off\nsetlocal DisableDelayedExpansion\ncall "%~dp0..\\..\\Start-ComfyUI.cmd" %*\n',
+        encoding='ascii')
 
 def prune_comfy(root):
     root=Path(root).resolve()

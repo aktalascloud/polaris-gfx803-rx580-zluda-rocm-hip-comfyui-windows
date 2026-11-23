@@ -1,5 +1,5 @@
 @echo off
-setlocal
+setlocal DisableDelayedExpansion
 rem Windows PowerShell must resolve its own built-in modules when called from pwsh.
 set "PSModulePath="
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\Install.ps1" %*

@@ -186,7 +186,7 @@ if($Backend -eq 'AMD'){
     }
     Copy-Item -LiteralPath (Join-Path $rocUnpacked 'library') -Destination $library -Recurse
     Copy-Item -LiteralPath $rocDll -Destination (Join-Path $hip 'bin\rocblas.dll') -Force
-    $zludaArchive=Fetch 'zluda' 'zluda-3.9.5.zip'
+    $zludaArchive=Fetch 'zluda' 'zluda-3.9.6-rocm5.zip'
     CheckedRun $cudaPython @('-I',(Join-Path $source 'tools\prepare.py'),'unzip',$zludaArchive,$root)
     $torchLib=Join-Path $cuda 'Lib\site-packages\torch\lib'
     $originalNvrtcHash=(Get-FileHash -LiteralPath (Join-Path $torchLib 'nvrtc64_112_0.dll') -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -199,7 +199,7 @@ Copy-Item -LiteralPath (Join-Path $source 'tools') -Destination (Join-Path $root
 Copy-Item -LiteralPath (Join-Path $source 'patches') -Destination (Join-Path $root 'patches') -Recurse
 foreach($name in @('Python-CUDA.cmd','Python-ONNX.cmd','Run-ZLUDA.cmd','HIP-Shell.cmd','Check-Zluda.cmd')){Copy-Item -LiteralPath (Join-Path $source ('launchers\'+$name)) -Destination (Join-Path $root $name)}
 if($WithTorchDirectML){Copy-Item -LiteralPath (Join-Path $source 'launchers\Python-DirectML.cmd') -Destination $root}
-$profile=@{backend=$Backend;version='0.4.3';comfy_installed=[bool]$WithComfyUI;attention_default=[bool]$WithComfyUI;torch_directml_installed=[bool]$WithTorchDirectML;architecture='Polaris/gfx803';comfy_commit='c0c011dca91b595091a4b032770da366fc90fb2b';models_included=$false;dxgi_device_id=$device.dxgi_index}
+$profile=@{backend=$Backend;version='0.4.4';comfy_installed=[bool]$WithComfyUI;attention_default=[bool]$WithComfyUI;torch_directml_installed=[bool]$WithTorchDirectML;architecture='Polaris/gfx803';comfy_commit=$components.comfy.commit;models_included=$false;dxgi_device_id=$device.dxgi_index}
 $profile.original_nvrtc_sha256=$originalNvrtcHash
 if($HipRuntime){$profile.hip_runtime=(Resolve-Path -LiteralPath $HipRuntime).ProviderPath}
 $profile | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $root 'profile.json') -Encoding UTF8

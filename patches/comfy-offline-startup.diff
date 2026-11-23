@@ -1,76 +1,73 @@
-diff --git a/comfy/zluda.py b/comfy/zluda.py
-index f6331ac..90f4c13 100644
---- a/comfy/zluda.py
-+++ b/comfy/zluda.py
-@@ -43,28 +43,13 @@ def parse_requirements_file(requirements_path):
-     return requirements
+diff --git a/comfy/utils.py b/comfy/utils.py
+--- a/comfy/utils.py
++++ b/comfy/utils.py
+@@ -75,10 +75,11 @@
+     "F8_E5M2": torch.float8_e5m2,
+     "C64": torch.complex64,
  
- def ensure_package(package_name, required_version):
--    try:
--        installed_version = get_package_version(package_name)
--        print(f"Installed version of {package_name}: {installed_version}")
--        
--        from packaging import version
--        if version.parse(installed_version) < version.parse(required_version):
--            install_package(package_name, required_version, upgrade=True)
--            print(f"\n{package_name} outdated. Upgraded to {required_version}.")
--    except Exception:
--        install_package(package_name, required_version)
--        print(f"\n{package_name} was missing. Installed it.")
-+    from packaging import version
-+    installed_version = get_package_version(package_name)
-+    if version.parse(installed_version) < version.parse(required_version):
-+        raise RuntimeError(f"Portable package {package_name} must be {required_version}; restore the pinned environment.")
+-    "U64": torch.uint64,
+-    "U32": torch.uint32,
+-    "U16": torch.uint16,
+ }
++for bits in (16, 32, 64):
++    dtype = getattr(torch, f"uint{bits}", None)
++    if dtype is not None:
++        _TYPES[f"U{bits}"] = dtype
  
- def install_package(package_name, version, upgrade=False):
--    import subprocess
--    import sys
--    args = [sys.executable, '-m', 'pip', 'install', 
--            f'{package_name}=={version}', 
--            '--quiet', 
--            '--disable-pip-version-check']
--    if upgrade:
--        args.append('--upgrade')
--    subprocess.check_call(args)
-+    raise RuntimeError("Automatic package installation is disabled in this portable build.")
+ def load_safetensors(ckpt):
+     f = open(ckpt, "rb")
+diff --git a/comfy/model_management.py b/comfy/model_management.py
+--- a/comfy/model_management.py
++++ b/comfy/model_management.py
+@@ -1140,12 +1140,15 @@
+     STREAM_CAST_BUFFERS.clear()
+     soft_empty_cache()
  
- import os
- requirements_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'requirements.txt')
-diff --git a/comfyui.bat b/comfyui.bat
-index 17771ee..47db49e 100644
---- a/comfyui.bat
-+++ b/comfyui.bat
-@@ -1,19 +1,3 @@
- @echo off
--
--set PYTHON="%~dp0/venv/Scripts/python.exe"
--set GIT=
--set VENV_DIR=./venv
--
--set COMMANDLINE_ARGS=--auto-launch --use-quad-cross-attention --reserve-vram 0.9
--
--set ZLUDA_COMGR_LOG_LEVEL=1
--
--echo *** Checking and updating to new version if possible 
--
--copy comfy\customzluda\zluda-default.py comfy\zluda.py /y >NUL
--git pull
--copy comfy\customzluda\zluda-default.py comfy\zluda.py /y >NUL
--
--echo.
--.\zluda\zluda.exe -- %PYTHON% main.py %COMMANDLINE_ARGS%
--pause
-+call "%~dp0Start-ComfyUI.cmd" %*
-+exit /b %ERRORLEVEL%
++is_compiling = getattr(torch.compiler, "is_compiling", lambda: False)
++
++
+ def get_offload_stream(device):
+     stream_counter = stream_counters.get(device, 0)
+     if NUM_STREAMS == 0:
+         return None
+ 
+-    if torch.compiler.is_compiling():
++    if is_compiling():
+         return None
+ 
+     if device in STREAMS:
+diff --git a/comfy/ops.py b/comfy/ops.py
+--- a/comfy/ops.py
++++ b/comfy/ops.py
+@@ -31,7 +31,7 @@
+ import comfy_aimdo.torch
+ 
+ def run_every_op():
+-    if torch.compiler.is_compiling():
++    if comfy.model_management.is_compiling():
+         return
+ 
+     comfy.model_management.throw_exception_if_processing_interrupted()
+diff --git a/comfy/quant_ops.py b/comfy/quant_ops.py
+--- a/comfy/quant_ops.py
++++ b/comfy/quant_ops.py
+@@ -2,6 +2,8 @@
+ import logging
+ 
+ try:
++    if not hasattr(torch.library, "custom_op"):
++        raise ImportError("Comfy Kitchen requires torch.library.custom_op")
+     import comfy_kitchen as ck
+     from comfy_kitchen.tensor import (
+         QuantizedTensor,
 diff --git a/utils/extra_config.py b/utils/extra_config.py
 --- a/utils/extra_config.py
 +++ b/utils/extra_config.py
-@@ -6,6 +6,9 @@
+@@ -6,6 +6,8 @@
  def load_extra_path_config(yaml_path):
      with open(yaml_path, 'r', encoding='utf-8') as stream:
          config = yaml.safe_load(stream)
 +    if config is None:
-+        logging.warning("Extra model paths config contains no mappings: %s", yaml_path)
 +        return
      yaml_dir = os.path.dirname(os.path.abspath(yaml_path))
      for c in config:
