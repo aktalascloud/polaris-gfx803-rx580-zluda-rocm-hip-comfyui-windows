@@ -1262,6 +1262,7 @@
       "device": "cuda:0",
       "z_image_node_present": true
     },
+    "newer_torch": {"torch":"2.7.0+cu118","zluda":"3.9.6 ROCm5","stage":"multiply/reduction on ten elements","error":"CUDA error: out of memory","gemm_reached":false},
     "models_or_generation_used": false
   }
 }

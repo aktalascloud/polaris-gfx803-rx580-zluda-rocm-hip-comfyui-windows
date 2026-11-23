@@ -30,6 +30,8 @@ $runtime = 'C:\AI\Polaris-New'
 
 On November 23, the matched advanced-lvl-up DLL and 159 library files passed the CUDA/PTX, elementwise/reduction, and 256×256 GEMM checks with Torch 2.2.1+cu118 on both ZLUDA 3.9.5 and 3.9.6 ROCm5. The PyTorch launcher checks the pinned Torch version and both rocBLAS parts before importing Torch. Restore the whole matched bundle if either part differs. The check also verifies the optional Small-GEMM artifacts against their receipt.
 
+An isolated Torch 2.7.0+cu118 run on ZLUDA 3.9.6 ROCm5 reproduced `CUDA error: out of memory` during the ten-element CUDA multiply/reduction, before reaching GEMM. This happened with the matched rocBLAS bundle on driver 31.0.14037.18001. The verified profile stays on Torch 2.2.1.
+
 ComfyUI 0.13.0 uses guarded unsigned dtypes and a fallback for the Torch compiler state query. This profile uses the existing eager code paths for standard models. Comfy Kitchen FP8/FP4 requires newer Torch. Use trusted model weights, especially for pickle-based checkpoints; `weights_only` in Torch 2.2.1 is affected by [CVE-2025-32434](https://github.com/advisories/ghsa-53q9-r3pm-6pq6).
 
 ## Attention
