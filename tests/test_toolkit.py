@@ -74,5 +74,25 @@ class SelectionTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'library does not match'):
                     verify_rocblas(root)
 
+    def test_rocblas_variant_verifies_shared_library_and_shim(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder)
+            library=root/'shared'
+            library.mkdir()
+            (library/'gfx803.hsaco').write_bytes(b'matched')
+            files={'rocblas.dll':b'shim','rocblas_backend.dll':b'baseline',
+                   'rocblas_small_gemm.hsaco':b'kernel'}
+            hashes={}
+            for name, data in files.items():
+                (root/name).write_bytes(data)
+                hashes[name]=hashlib.sha256(data).hexdigest()
+            (root/'small-gemm-patch.json').write_text(json.dumps({'enabled':True,'files':hashes}))
+            library_hash=hashlib.sha256(b'gfx803.hsaco\0'+hashlib.sha256(b'matched').digest()).hexdigest()
+            with patch('gpu_runtime.ROCBLAS_DLL_SHA256',hashes['rocblas_backend.dll']), patch('gpu_runtime.ROCBLAS_LIBRARY_SHA256',library_hash):
+                self.assertTrue(verify_rocblas(root,library=library))
+                (root/'rocblas_small_gemm.hsaco').write_bytes(b'changed')
+                with self.assertRaisesRegex(ValueError, 'Small-GEMM artifact changed'):
+                    verify_rocblas(root,library=library)
+
 
 if __name__=='__main__':unittest.main()

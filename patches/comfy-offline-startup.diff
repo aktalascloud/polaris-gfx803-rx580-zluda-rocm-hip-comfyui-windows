@@ -72,3 +72,69 @@ diff --git a/utils/extra_config.py b/utils/extra_config.py
      yaml_dir = os.path.dirname(os.path.abspath(yaml_path))
      for c in config:
          conf = config[c]
+diff --git a/main.py b/main.py
+--- a/main.py
++++ b/main.py
+@@ -125,7 +125,10 @@
+ 
+     node_paths = folder_paths.get_folder_paths("custom_nodes")
+     for custom_node_path in node_paths:
+-        possible_modules = os.listdir(custom_node_path)
++        try:
++            possible_modules = os.listdir(custom_node_path)
++        except FileNotFoundError:
++            continue
+         node_prestartup_times = []
+ 
+         for possible_module in possible_modules:
+diff --git a/nodes.py b/nodes.py
+--- a/nodes.py
++++ b/nodes.py
+@@ -1738,7 +1738,7 @@
+             if 'A' in i.getbands():
+                 mask = np.array(i.getchannel('A')).astype(np.float32) / 255.0
+                 mask = 1. - torch.from_numpy(mask)
+-            elif i.mode == 'P' and 'transparency' in i.info:
++            elif 'transparency' in i.info:
+                 mask = np.array(i.convert('RGBA').getchannel('A')).astype(np.float32) / 255.0
+                 mask = 1. - torch.from_numpy(mask)
+             else:
+@@ -2302,6 +2302,10 @@
+     node_paths = folder_paths.get_folder_paths("custom_nodes")
+     node_import_times = []
+     for custom_node_path in node_paths:
+-        possible_modules = os.listdir(os.path.realpath(custom_node_path))
++        try:
++            possible_modules = os.listdir(os.path.realpath(custom_node_path))
++        except FileNotFoundError:
++            logging.warning("Skipping missing custom nodes directory: %s", custom_node_path)
++            continue
+         if "__pycache__" in possible_modules:
+             possible_modules.remove("__pycache__")
+diff --git a/comfy/cli_args.py b/comfy/cli_args.py
+--- a/comfy/cli_args.py
++++ b/comfy/cli_args.py
+@@ -228,16 +228,19 @@
+     help="Set the base URL for the ComfyUI API.  (default: https://api.comfy.org)",
+ )
+ 
+-database_default_path = os.path.abspath(
+-    os.path.join(os.path.dirname(__file__), "..", "user", "comfyui.db")
+-)
+-parser.add_argument("--database-url", type=str, default=f"sqlite:///{database_default_path}", help="Specify the database URL, e.g. for an in-memory database you can use 'sqlite:///:memory:'.")
++parser.add_argument("--database-url", type=str, default=None, help="SQLite URL. Defaults to comfyui.db in the effective user directory.")
+ parser.add_argument("--disable-assets-autoscan", action="store_true", help="Disable asset scanning on startup for database synchronization.")
+ 
+ if comfy.options.args_parsing:
+     args = parser.parse_args()
+ else:
+     args = parser.parse_args([])
++
++if args.database_url is None:
++    base_path = args.base_directory or os.path.join(os.path.dirname(__file__), "..")
++    user_path = args.user_directory or os.path.join(base_path, "user")
++    database_path = os.path.abspath(os.path.join(user_path, "comfyui.db"))
++    args.database_url = f"sqlite:///{database_path}"
+ 
+ if args.windows_standalone_build:
+     args.auto_launch = True

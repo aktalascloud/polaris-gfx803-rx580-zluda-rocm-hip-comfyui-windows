@@ -13,6 +13,7 @@ if($backend -ne 'AMD'){throw 'This package targets AMD Polaris/gfx803 only'}
 $python=Join-Path $root 'envs\cuda\python.exe'
 $env:CUDA_MODULE_LOADING='LAZY'
 $env:ZLUDA_WAVE64_SLOW_MODE='0'
+if(!$env:ZLUDA_CACHE_DIR){$env:ZLUDA_CACHE_DIR=Join-Path $root 'cache\zluda-3.9.6'}
 $env:PYTHONUNBUFFERED='1'
 $env:HF_HUB_DISABLE_TELEMETRY='1'
 $env:DO_NOT_TRACK='1'

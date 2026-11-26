@@ -3,4 +3,4 @@
 *.ps1 text eol=crlf
 *.py text eol=lf
 # Preserve whitespace in upstream patch context and removed lines.
-patches/*.diff whitespace=-blank-at-eol
+patches/*.diff text eol=lf whitespace=-blank-at-eol

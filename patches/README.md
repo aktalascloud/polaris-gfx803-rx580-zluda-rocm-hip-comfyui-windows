@@ -9,7 +9,7 @@ Install.cmd invokes tools/Install.ps1. It stages dependencies from profiles/, co
 | HIP 5.7.1 / ZLUDA 3.9.6 | SDK-only extraction and pinned upstream ROCm5 build |
 | rocBLAS | Matched advanced-lvl-up DLL and gfx803 kernels. SHA-256 of the DLL is 9e88918e65b81eeb128c69cd7a96ab495b101daf51f6f78f943445d7d4c5f70d |
 | PyTorch | ZLUDA cublas, cusparse and NVRTC aliases, with original NVRTC preserved |
-| ComfyUI 0.13.0 | [Torch 2.2 compatibility and empty YAML fix](comfy-offline-startup.diff). [Pinned download hashes](../profiles/components.json) |
+| ComfyUI 0.13.0 | [Torch 2.2 compatibility, YAML, custom nodes and PNG masks](comfy-offline-startup.diff). [Pinned download hashes](../profiles/components.json) |
 | Attention | [Hash-guarded installer](attention_patch.py) and [tiled implementation](polaris_attention.py), enabled automatically for optional ComfyUI |
 | Small-GEMM | [Windows HIP shim and kernel](small-gemm/), enabled by -WithSmallGemmPatch |
 
@@ -34,6 +34,12 @@ An isolated Torch 2.7.0+cu118 run on ZLUDA 3.9.6 ROCm5 reproduced `CUDA error: o
 
 ComfyUI 0.13.0 uses guarded unsigned dtypes and a fallback for the Torch compiler state query. This profile uses the existing eager code paths for standard models. Comfy Kitchen FP8/FP4 requires newer Torch. Use trusted model weights, especially for pickle-based checkpoints; `weights_only` in Torch 2.2.1 is affected by [CVE-2025-32434](https://github.com/advisories/ghsa-53q9-r3pm-6pq6).
 
+The November 26 refresh backports missing custom-node directories from [ComfyUI #17954](https://github.com/Comfy-Org/ComfyUI/pull/17954) and adapts the transparency handling from [#18007](https://github.com/Comfy-Org/ComfyUI/pull/18007) to the pinned Pillow loader. It keeps EXIF orientation and creates masks from transparent palette, grayscale and RGB PNG pixels. ComfyUI [v0.46.0](https://github.com/Comfy-Org/ComfyUI/releases/tag/v0.46.0) references unsigned Torch dtypes missing in 2.2.1 and uses a newer Aimdo/Kitchen stack. The Qwen grouped linear changes in [#17361](https://github.com/Comfy-Org/ComfyUI/pull/17361) build on that stack. The patched profile stays at 0.13.0.
+
+The default database now follows `--base-directory` and `--user-directory`. This adapts the path selection from [ComfyUI #14539](https://github.com/Comfy-Org/ComfyUI/pull/14539) and leaves databases in their original folders. An explicit `--database-url` takes precedence.
+
+The launchers use ZLUDA 3.9.6's per-installation cache at `cache/zluda-3.9.6`. Set `ZLUDA_CACHE_DIR` to use another directory. A fresh cache compiles kernels on first use. The [ZLUDA upstream v6](https://github.com/vosen/ZLUDA/releases/tag/v6) release uses a newer compiler and runtime family.
+
 ## Attention
 
 Small ordinary FP32 uses ComfyUI stock math. Large (estimated score ≥8 MiB), masked and FP16 inference uses head/query tiles, with score tiles capped at 32 MiB and adjusted to available memory. FP16 computes in FP32 and returns the original dtype. Explicit backends, training, unsupported devices/dtypes, explicit no-upcast-half and keys too long for one score row retain upstream paths.
@@ -54,7 +60,7 @@ Tiny FP32 (M,N,K from 1 to 8), host alpha/beta, Polaris device 0 and initial HIP
 
 Close consumers before apply/rollback. Build against the trusted original backend. Use rocblas_backend.dll if already patched or rocblas.dll from an unpatched matched runtime. The generated kernel32 import stub is a build-only artifact.
 
-Small-GEMM builds the gfx803 kernel at `-O3` with `-fno-fast-math`. The x64 shim uses `-O3 -mtune=haswell` and full LTO at level 3. Haswell scheduling tunes for Xeon E5 v3 while keeping the baseline x64 instruction set. The HIP 5.7.1 build and all original export ordinals were verified with these flags. The new build has no GPU timings or numerical results.
+Small-GEMM builds the gfx803 kernel at `-O3` with `-fno-fast-math`. The x64 shim uses `-O3 -mtune=haswell` and full LTO at level 3. Haswell scheduling tunes for Xeon E5 v3 while keeping the baseline x64 instruction set. The November 26 HIP 5.7.1 rebuild preserved 3,936 export ordinals and passed 276 numerical cases and 32 contract checks on RX 580. [Results](../tests/results.json).
 
 ~~~powershell
 $build = 'C:\AI\Polaris-Build'
@@ -83,7 +89,7 @@ The pinned source installer and attention apply/rollback/reapply passed. The YAM
 
 ## Licenses
 
-Packaging scripts and documentation © 2026 aktalascloud, [GPL-3.0-only](../LICENSE). The startup diff modifies the pinned ComfyUI fork and preserves upstream notices. The bounded attention rewrite was inspired by the [advanced-lvl-up GPL helper](https://github.com/advanced-lvl-up/Rx470-Vega10-Rx580-gfx803-gfx900-fix-AMD-GPU/blob/6547664db8732305530b969b54c9b7d3806c02e1/jab-attention-VRAM-helper.zip). The [Small-GEMM notice](small-gemm/NOTICE.txt) preserves original provenance. Setup configures no cloud keys and provides no vendor endorsement.
+Packaging scripts and documentation © 2026 aktalascloud, [GPL-3.0-only](../LICENSE). The startup diff modifies the pinned ComfyUI source and preserves upstream notices. The bounded attention rewrite was inspired by the [advanced-lvl-up GPL helper](https://github.com/advanced-lvl-up/Rx470-Vega10-Rx580-gfx803-gfx900-fix-AMD-GPU/blob/6547664db8732305530b969b54c9b7d3806c02e1/jab-attention-VRAM-helper.zip). The [Small-GEMM notice](small-gemm/NOTICE.txt) preserves original provenance. Setup configures no cloud keys and provides no vendor endorsement.
 
 **Only source and sanitized numeric evidence are published.** Vendor DLLs/EXEs,
 wheels, SDK/driver installers, generated code objects, models, raw logs, private

@@ -199,14 +199,14 @@ Copy-Item -LiteralPath (Join-Path $source 'tools') -Destination (Join-Path $root
 Copy-Item -LiteralPath (Join-Path $source 'patches') -Destination (Join-Path $root 'patches') -Recurse
 foreach($name in @('Python-CUDA.cmd','Python-ONNX.cmd','Run-ZLUDA.cmd','HIP-Shell.cmd','Check-Zluda.cmd')){Copy-Item -LiteralPath (Join-Path $source ('launchers\'+$name)) -Destination (Join-Path $root $name)}
 if($WithTorchDirectML){Copy-Item -LiteralPath (Join-Path $source 'launchers\Python-DirectML.cmd') -Destination $root}
-$profile=@{backend=$Backend;version='0.4.4';comfy_installed=[bool]$WithComfyUI;attention_default=[bool]$WithComfyUI;torch_directml_installed=[bool]$WithTorchDirectML;architecture='Polaris/gfx803';comfy_commit=$components.comfy.commit;models_included=$false;dxgi_device_id=$device.dxgi_index}
+$profile=@{backend=$Backend;version='0.4.5';comfy_installed=[bool]$WithComfyUI;attention_default=[bool]$WithComfyUI;torch_directml_installed=[bool]$WithTorchDirectML;architecture='Polaris/gfx803';comfy_commit=$components.comfy.commit;models_included=$false;dxgi_device_id=$device.dxgi_index}
 $profile.original_nvrtc_sha256=$originalNvrtcHash
 if($HipRuntime){$profile.hip_runtime=(Resolve-Path -LiteralPath $HipRuntime).ProviderPath}
 $profile | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $root 'profile.json') -Encoding UTF8
 # PE/version diagnostics only: no device allocation or numerical workload.
 CheckedRun $probePython @('-I',(Join-Path $source 'tools\hip_runtime.py'),'--root',$root)
 if($WithSmallGemmPatch){
-    $build=Join-Path $source ('work\small-gemm-'+[guid]::NewGuid().ToString('N'))
+    $build=Join-Path $downloads ('small-gemm-'+[guid]::NewGuid().ToString('N'))
     & (Join-Path $source 'patches\small-gemm\Build-SmallGemm.ps1') -HipRoot (Join-Path $root 'hip') -BackendDll (Join-Path $root 'hip\bin\rocblas.dll') -Python $probePython -OutDir $build
     & (Join-Path $source 'patches\small-gemm\Small-Gemm.ps1') -RuntimeRoot $root -BuildDirectory $build
 }

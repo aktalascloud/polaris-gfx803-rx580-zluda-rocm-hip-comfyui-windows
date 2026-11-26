@@ -26,7 +26,8 @@ def patch_comfy(root,patch):
         if not lines[position].startswith('+++ b/'):
             position+=1;continue
         name=lines[position][6:]
-        if name not in {'comfy/model_management.py','comfy/ops.py','comfy/quant_ops.py','comfy/utils.py','utils/extra_config.py'}:
+        if name not in {'comfy/cli_args.py','comfy/model_management.py','comfy/ops.py','comfy/quant_ops.py','comfy/utils.py',
+                        'main.py','nodes.py','utils/extra_config.py'}:
             raise ValueError('Unexpected patched file')
         path=under(root,name)
         original=path.read_text(encoding='utf-8-sig').splitlines()

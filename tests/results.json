@@ -1264,5 +1264,86 @@
     },
     "newer_torch": {"torch":"2.7.0+cu118","zluda":"3.9.6 ROCm5","stage":"multiply/reduction on ten elements","error":"CUDA error: out of memory","gemm_reached":false},
     "models_or_generation_used": false
+  },
+  "upstream-refresh-20261126": {
+    "recorded_date": "2026-11-26",
+    "platform": {
+      "gpu": "RX 580 2048SP",
+      "target": "gfx803",
+      "driver": "31.0.14037.18001",
+      "hip_sdk": "5.7.1",
+      "zluda": "3.9.6 ROCm5",
+      "torch": "2.2.1+cu118"
+    },
+    "small_gemm": {
+      "flags": {
+        "kernel": "-O3 -fno-fast-math",
+        "shim": "-O3 -mtune=haswell -flto=full",
+        "link": "/opt:ref,icf,lldlto=3"
+      },
+      "hashes": {
+        "rocblas.dll": "2ded888110da7c22a850f97440ebbe292a8bf3f3838069460d952964e2fd3ce8",
+        "rocblas_backend.dll": "9e88918e65b81eeb128c69cd7a96ab495b101daf51f6f78f943445d7d4c5f70d",
+        "rocblas_small_gemm.hsaco": "1d203f0b9b9c8f26631895a6884975efb9ef9afa552596c904b968941aef2fee"
+      },
+      "exports_preserved": 3936,
+      "tests": {
+        "strided": {
+          "cases": 69,
+          "supported_cases": 69,
+          "max_abs_error": 3.337860107421875e-06,
+          "nondefault_stream": false
+        },
+        "sgemm": {
+          "cases": 69,
+          "supported_cases": 69,
+          "max_abs_error": 3.337860107421875e-06,
+          "nondefault_stream": true
+        },
+        "ex": {
+          "cases": 69,
+          "supported_cases": 69,
+          "max_abs_error": 3.337860107421875e-06,
+          "nondefault_stream": true
+        },
+        "strided-ex": {
+          "cases": 69,
+          "supported_cases": 69,
+          "max_abs_error": 3.337860107421875e-06,
+          "nondefault_stream": true
+        }
+      },
+      "contract_checks": 32,
+      "contract_max_abs_error": 1.1920928955078125e-07
+    },
+    "torch_cuda_and_gemm": {
+      "device": "AMD Radeon RX 580 2048SP [ZLUDA]",
+      "torch": "2.2.1+cu118",
+      "sum": 90.0,
+      "gemm_max_abs_error": {
+        "torch.float32": 4.57763671875e-05,
+        "torch.float16": 0.01898956298828125
+      },
+      "passed": true
+    },
+    "comfyui": {
+      "version": "0.13.0",
+      "latest_reviewed": "0.46.0",
+      "latest_import_blocker": "comfy_aimdo.host_buffer missing in pinned Aimdo",
+      "upstream_patches": [
+        17954,
+        18007,
+        14539
+      ],
+      "png_cases": 8,
+      "database_path_cases": 4,
+      "small_gemm_http": 200,
+      "baseline_http": 200,
+      "resolved_rocblas_verified": true,
+      "separate_database_verified": true,
+      "bounded_attention_active": true
+    },
+    "toolkit_cpu_tests": 8,
+    "scope": "Compile and export checks, synthetic CUDA/GEMM, CPU regressions and ComfyUI startup. No generation, speed measurements or full clean install."
   }
 }

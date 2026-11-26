@@ -19,8 +19,9 @@ def file_digest(path):
         return hashlib.file_digest(stream, 'sha256')
 
 
-def verify_rocblas(bin_dir):
-    library = bin_dir/'rocblas'/'library'
+def verify_rocblas(bin_dir, *, library=None):
+    if library is None:
+        library = bin_dir/'rocblas'/'library'
     receipt = bin_dir/'small-gemm-patch.json'
     patch = json.loads(receipt.read_text(encoding='utf-8-sig')) if receipt.is_file() else {}
     patched = patch.get('enabled', False)

@@ -42,10 +42,10 @@ Setup needs Windows x64, an existing compatible AMD driver, internet and about 2
 ## RX580 results
 
 - **Attention** · 146 synthetic GPU cases passed in each of two processes. FP32 4096×4096 attention: 87.68 → 53.86 ms (−38.6%), additional peak tensor allocations 1024 → 69 MiB.
-- **Small-GEMM** · opt-in tiny FP32 correctness fix. Strided baseline 63/69; the validated patch build passed 69/69 on each of four APIs. The v0.4.3 compiler flags were checked at build time; no new GPU results.
+- **Small-GEMM** · opt-in tiny FP32 correctness fix. The Haswell-tuned v0.4.5 rebuild passed 69/69 cases on each of four rocBLAS APIs on RX 580, plus 32 contract checks.
 - **Backends** · CUDA vector addition 64/64. Torch and strict ONNX DirectML passed. OpenVINO CPU passed, OpenVINO GPU returned incorrect zeros.
 
-Замеры attention и Small-GEMM относятся к прежним сборкам. / Attention and Small-GEMM figures come from earlier builds.
+Для attention приведены прежние замеры. Проверка Small-GEMM в v0.4.5 проверяет точность. / The attention measurements are historical. The v0.4.5 Small-GEMM results cover correctness.
 
 ## Структура / Source layout
 
